@@ -2,6 +2,16 @@ init
 
 https://flask.palletsprojects.com/en/3.0.x/installation/
 
+Create an environment
+
+mac:
+. .venv/bin/activate
+
+window:
+.venv\Scripts\activate
+
+Activate the environment
+
 mac:
 . .venv/bin/activate
 
