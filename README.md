@@ -5,10 +5,10 @@ https://flask.palletsprojects.com/en/3.0.x/installation/
 Create an environment
 
 mac:
-. .venv/bin/activate
+python3 -m venv .venv
 
 window:
-.venv\Scripts\activate
+py -3 -m venv .venv
 
 Activate the environment
 
