@@ -1,5 +1,7 @@
 init
 
+安裝python 3.12.1
+
 https://flask.palletsprojects.com/en/3.0.x/installation/
 
 Create an environment
