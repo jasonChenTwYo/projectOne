@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, Response, app
-from app import stream
+from . import stream
 
 bp = Blueprint("video", __name__, url_prefix="/video")
 
