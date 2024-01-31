@@ -7,7 +7,8 @@
 # You can add other services your application may depend on here, such as a
 # database or a cache. For examples, see the Awesome Compose repository:
 # https://github.com/docker/awesome-compose
-services:  
+services:
+
   backend:
     build:
       context: .
@@ -16,17 +17,21 @@ services:
     depends_on:
       db:
        condition: service_healthy
+
   db:
     image: mysql     
     restart: always
     environment:
        MYSQL_ROOT_PASSWORD: root  
+       MYSQL_USER: appuser
+       MYSQL_PASSWORD: 1234567
+       MYSQL_DATABASE: projectOne
     ports:
        - 3306:3306
     volumes:
        - db-data:/var/lib/mysql
     healthcheck:
-       test: ["CMD", "mysql", "-uroot", "-proot"]
+       test: ["CMD", "mysql", "-uappuser", "-p1234567"]
        interval: 10s
        timeout: 5s
        retries: 5
