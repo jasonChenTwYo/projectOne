@@ -11,7 +11,7 @@ services:
 
   backend:
     build:
-      context: .
+      context: backend
     ports:
        - 5000:5000
     depends_on:
@@ -22,22 +22,30 @@ services:
     image: mysql     
     restart: always
     environment:
-       MYSQL_ROOT_PASSWORD: root  
        MYSQL_USER: appuser
-       MYSQL_PASSWORD: 1234567
+       MYSQL_PASSWORD_FILE: /run/secrets/mysql_password
+       MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_password
        MYSQL_DATABASE: projectOne
     ports:
        - 3306:3306
     volumes:
        - db-data:/var/lib/mysql
+       - ./mysql/sqls:/docker-entrypoint-initdb.d
+    secrets:
+       - mysql_root_password
+       - mysql_password   
     healthcheck:
-       test: ["CMD", "mysql", "-uappuser", "-p1234567"]
-       interval: 10s
-       timeout: 5s
-       retries: 5
+      test: ['CMD-SHELL', 'mysqladmin ping -h 127.0.0.1 --password="$$(cat /run/secrets/mysql_root_password)" --silent']
+      interval: 3s
+      retries: 5
+      start_period: 30s
 volumes:
-   db-data:           
-
+   db-data:
+secrets:              
+   mysql_root_password:
+      file: mysql/mysql_root_password.txt
+   mysql_password:
+      file: mysql/mysql_password.txt   
 # The commented out section below is an example of how to define a PostgreSQL
 # database that your application can use. `depends_on` tells Docker Compose to
 # start the database before your application. The `db-data` volume persists the

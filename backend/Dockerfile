@@ -48,4 +48,4 @@ EXPOSE 5000
 # Run the application.
 CMD flask --app app run --host=0.0.0.0
 
-#CMD ["flask","--app","app","rum","--host","0.0.0.0"]
+#CMD ["flask","--app","app","run","--host","0.0.0.0"]
