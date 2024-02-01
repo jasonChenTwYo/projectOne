@@ -28,11 +28,9 @@ def create_app(test_config=None):
         return 'Hello, World!'
     
     from .auth import auth
-    from .video import video
-
+   
     app.register_blueprint(auth.bp)
-    app.register_blueprint(video.bp)
-
+ 
     from . import db
     db.init_app(app)
 

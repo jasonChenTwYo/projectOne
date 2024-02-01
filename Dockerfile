@@ -36,12 +36,6 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     --mount=type=bind,source=requirements.txt,target=requirements.txt \
     python -m pip install -r requirements.txt
     
-RUN <<EOF
-apt-get update
-apt-get install -y libgl1-mesa-glx
-apt-get install -y libglib2.0-0
-EOF
-
 # Switch to the non-privileged user to run the application.
 USER appuser
 
