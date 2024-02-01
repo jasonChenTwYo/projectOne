@@ -22,10 +22,12 @@ services:
     image: mysql     
     restart: always
     environment:
+       MYSQL_DATABASE: projectOne
        MYSQL_USER: appuser
+       # 參考文件: https://hub.docker.com/_/mysql 的 Docker Secrets 章節
+       # 參考模板: https://github.com/docker/awesome-compose/blob/master/nginx-flask-mysql/compose.yaml
        MYSQL_PASSWORD_FILE: /run/secrets/mysql_password
        MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_password
-       MYSQL_DATABASE: projectOne
     ports:
        - 3306:3306
     volumes:
