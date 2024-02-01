@@ -17,7 +17,7 @@ services:
     depends_on:
       db:
        condition: service_healthy
-
+# https://hub.docker.com/_/mysql
   db:
     image: mysql     
     restart: always
@@ -30,6 +30,9 @@ services:
        - 3306:3306
     volumes:
        - db-data:/var/lib/mysql
+       # docker hub mysql 文件說初次執行container時會執行 /docker-entrypoint-initdb.d 底下的 sql 檔案
+       # 預設把 table 建立在 MYSQL_DATABASE 環境變數指定的 DATABASE , 如果有多個sql檔案就按檔名的字母順序執行
+       # 參考文件: https://hub.docker.com/_/mysql 的 Initializing a fresh instance 章節
        - ./mysql/sqls:/docker-entrypoint-initdb.d
     secrets:
        - mysql_root_password
