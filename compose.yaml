@@ -61,7 +61,10 @@ services:
       - backend
     networks:
       - frontnet
-
+# 建立網路，建立網路後兩個container就可以用services中宣告的名字當去連線
+# ex: 
+# backend 容器中 flask 可以用mysql這個名稱當連線的host
+# proxy 容器中 nginx 可以用backend這個名稱當做要proxy_pass的domain name
 networks:
   frontnet:
   backend:   
