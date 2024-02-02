@@ -12,13 +12,17 @@ services:
   backend:
     build:
       context: backend
-    ports:
-       - 5000:5000
+    networks:
+      - frontnet
+      - backend
+    secrets:
+      - mysql_password  
     depends_on:
-      db:
+      mysql:
        condition: service_healthy
+
 # https://hub.docker.com/_/mysql
-  db:
+  mysql:
     image: mysql     
     restart: always
     environment:
@@ -26,6 +30,7 @@ services:
        MYSQL_USER: appuser
        # 參考文件: https://hub.docker.com/_/mysql 的 Docker Secrets 章節
        # 參考模板: https://github.com/docker/awesome-compose/blob/master/nginx-flask-mysql/compose.yaml
+       # 切記secrets 要宣告最上層跟容器內都要
        MYSQL_PASSWORD_FILE: /run/secrets/mysql_password
        MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_password
     ports:
@@ -44,6 +49,22 @@ services:
       interval: 3s
       retries: 5
       start_period: 30s
+    networks:
+       - backend
+
+  proxy:
+    build: proxy
+    restart: always
+    ports:
+      - 80:80
+    depends_on: 
+      - backend
+    networks:
+      - frontnet
+
+networks:
+  frontnet:
+  backend:   
 volumes:
    db-data:
 secrets:              

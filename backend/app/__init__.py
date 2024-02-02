@@ -1,6 +1,8 @@
 from flask import Flask
+from .db import DBManager
 import os
 
+conn = None
 
 def create_app(test_config=None):
     # create and configure the app
@@ -27,6 +29,19 @@ def create_app(test_config=None):
     def hello():
         return 'Hello, World!'
     
+    @app.route('/listBlog')
+    def listBlog():
+        global conn
+        if not conn:
+            conn = DBManager(password_file='/run/secrets/mysql_password')
+            conn.populate_db()
+        rec = conn.query_titles()
+
+        response = ''
+        for c in rec:
+            response = response  + '<div>   Hello  ' + c + '</div>'
+        return response
+    
     from .auth import auth
     from . import blog
 
@@ -34,8 +49,5 @@ def create_app(test_config=None):
     app.add_url_rule('/', endpoint='index')
    
     app.register_blueprint(auth.bp)
- 
-    from . import db
-    db.init_app(app)
-
+    
     return app

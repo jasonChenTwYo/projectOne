@@ -1,37 +1,27 @@
-import sqlite3
+import mysql.connector
 
-import click
-from flask import current_app, g
-
-def init_app(app):
-    app.teardown_appcontext(close_db)
-    app.cli.add_command(init_db_command)
-@click.command('init-db')
-def init_db_command():
-    """Clear the existing data and create new tables."""
-    init_db()
-    click.echo('Initialized the database.')
-
-def init_db():
-    db = get_db()
-
-    with current_app.open_resource('schema.sql') as f:
-        db.executescript(f.read().decode('utf8'))
-
-def get_db():
-    if 'db' not in g:
-        g.db = sqlite3.connect(
-            current_app.config['DATABASE'],
-            detect_types=sqlite3.PARSE_DECLTYPES
+class DBManager:
+    def __init__(self, database='projectOne', host="mysql", user="appuser", password_file=None):
+        pf = open(password_file, 'r')
+        self.connection = mysql.connector.connect(
+            user=user, 
+            password=pf.read(),
+            host=host, # name of the mysql service as set in the docker compose file
+            database=database,
         )
-        g.db.row_factory = sqlite3.Row
-
-    return g.db
-
-
-def close_db(e=None):
-    db = g.pop('db', None)
-
-    if db is not None:
-        db.close()
+        pf.close()
+        self.cursor = self.connection.cursor()
+    
+    def populate_db(self):
+        self.cursor.execute('DROP TABLE IF EXISTS blog')
+        self.cursor.execute('CREATE TABLE blog (id INT AUTO_INCREMENT PRIMARY KEY, title VARCHAR(255))')
+        self.cursor.executemany('INSERT INTO blog (id, title) VALUES (%s, %s);', [(i, 'Blog post #%d'% i) for i in range (1,5)])
+        self.connection.commit()
+    
+    def query_titles(self):
+        self.cursor.execute('SELECT title FROM blog')
+        rec = []
+        for c in self.cursor:
+            rec.append(c[0])
+        return rec
 

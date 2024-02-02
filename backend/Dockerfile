@@ -42,10 +42,13 @@ USER appuser
 # Copy the source code into the container.
 COPY . .
 
+ENV FLASK_RUN_HOST 0.0.0.0
+ENV FLASK_APP app
+
 # Expose the port that the application listens on.
 EXPOSE 5000
 
 # Run the application.
-CMD flask --app app run --host=0.0.0.0
+CMD flask run
 
 #CMD ["flask","--app","app","run","--host","0.0.0.0"]
