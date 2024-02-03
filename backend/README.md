@@ -33,4 +33,4 @@ run
 
 flask --app backend/app run
 
-
+gunicorn -w 3 -t 60  backend:app
