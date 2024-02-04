@@ -1,11 +1,18 @@
 import functools
 
 from flask import (
-    Blueprint, flash, g, redirect, render_template, request, session, url_for
+    Blueprint, flash, g, redirect, render_template, request, session, url_for, current_app
 )
 from werkzeug.security import check_password_hash, generate_password_hash
 
 bp = Blueprint("auth", __name__, url_prefix="/auth")
+
+@bp.route('/')
+def index():
+    current_app.logger.info('ttt')
+    dbhost = current_app.config['DB_SERVER']
+    current_app.logger.info('dbhost:'+dbhost)
+    return "yes"
 
 # @bp.before_app_request
 # def load_logged_in_user():
