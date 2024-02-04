@@ -4,6 +4,7 @@ from logging.config import dictConfig
 #import json
 conn = None
 
+#參考: https://flask.palletsprojects.com/en/3.0.x/logging/
 dictConfig({
     'version': 1,
     'formatters': {'default': {
@@ -21,11 +22,13 @@ dictConfig({
 })
 
 def create_app(test_config=None):
-    # create and configure the app
+    # instance_relative_config=True 代表config.cfg可以放在instance目錄底下 參考:https://flask.palletsprojects.com/en/3.0.x/config/#instance-folders
     app = Flask(__name__, instance_relative_config=True)
   
     if test_config is None:
         # load the instance config, if it exists, when not testing
+
+        # 載入配置檔也可以用json的格式範例如下 參考:https://flask.palletsprojects.com/en/3.0.x/config/#configuring-from-data-files
         # app.config.from_file("config.json", load=json.load)
         app.config.from_pyfile("config.cfg")
     else:
