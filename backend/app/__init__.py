@@ -1,5 +1,7 @@
 from flask import Flask
+import flask_login
 from .db import DBManager
+from . import user
 from logging.config import dictConfig
 #import json
 conn = None
@@ -24,7 +26,7 @@ dictConfig({
 def create_app(test_config=None):
     # instance_relative_config=True 代表config.cfg可以放在instance目錄底下 參考:https://flask.palletsprojects.com/en/3.0.x/config/#instance-folders
     app = Flask(__name__, instance_relative_config=True)
-  
+
     if test_config is None:
         # load the instance config, if it exists, when not testing
 
@@ -34,6 +36,14 @@ def create_app(test_config=None):
     else:
         # load the test config if passed in
         app.config.from_mapping(test_config)
+
+    login_manager = flask_login.LoginManager()
+    login_manager.init_app(app)
+
+    @login_manager.user_loader
+    def user_loader(id):
+        app.logger.info("call user_loader")
+        return user.users.get(id)    
 
     @app.route('/hello')
     def hello():
