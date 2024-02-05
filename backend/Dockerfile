@@ -59,3 +59,5 @@ EXPOSE 8000
 #如果一個 worker 在指定時間內沒有處理完請求，它將被強制終止。這有助於防止長時間的請求佔用 worker 資源。
 # -b 0.0.0.0:8000: 指定 Gunicorn 監聽的 IP 位址和端口
 CMD ["gunicorn", "-w", "3", "-t", "60", "-b", " 0.0.0.0:8000", "app:create_app()"]
+# --preload 如果啟服務是敗可以加上去顯示更詳細的error log
+#CMD ["gunicorn", "-w", "3", "-t", "60", "-b", " 0.0.0.0:8000", "app:create_app()","--preload"]

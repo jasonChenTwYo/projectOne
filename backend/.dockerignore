@@ -30,7 +30,6 @@
 **/obj
 **/secrets.dev.yaml
 **/values.dev.yaml
-**/instance
 README.Docker.md
 LICENSE
 README.md
