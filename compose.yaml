@@ -16,48 +16,62 @@ services:
       - frontnet
       - backend
     secrets:
-      - mysql_password  
+      - mysql_password
     depends_on:
+      redis:
+        condition: service_started
       mysql:
-       condition: service_healthy
+        condition: service_healthy
+      
+    
+  redis:
+    image: 'redislabs/redismod'
+    ports:
+      - '6379:6379'
+    networks:  
+      - backend
 
-# https://hub.docker.com/_/mysql
+  # https://hub.docker.com/_/mysql
   mysql:
-    image: mysql     
+    image: mysql
     restart: always
     environment:
-       MYSQL_DATABASE: projectOne
-       MYSQL_USER: appuser
-       # 參考文件: https://hub.docker.com/_/mysql 的 Docker Secrets 章節
-       # 參考模板: https://github.com/docker/awesome-compose/blob/master/nginx-flask-mysql/compose.yaml
-       # 切記secrets 要宣告最上層跟容器內都要
-       MYSQL_PASSWORD_FILE: /run/secrets/mysql_password
-       MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_password
+      MYSQL_DATABASE: projectOne
+      MYSQL_USER: appuser
+      # 參考文件: https://hub.docker.com/_/mysql 的 Docker Secrets 章節
+      # 參考模板: https://github.com/docker/awesome-compose/blob/master/nginx-flask-mysql/compose.yaml
+      # 切記secrets 要宣告最上層跟容器內都要
+      MYSQL_PASSWORD_FILE: /run/secrets/mysql_password
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_password
     ports:
-       - 3306:3306
+      - 3306:3306
     volumes:
-       - db-data:/var/lib/mysql
-       # docker hub mysql 文件說初次執行container時會執行 /docker-entrypoint-initdb.d 底下的 sql 檔案
-       # 預設把 table 建立在 MYSQL_DATABASE 環境變數指定的 DATABASE , 如果有多個sql檔案就按檔名的字母順序執行
-       # 參考文件: https://hub.docker.com/_/mysql 的 Initializing a fresh instance 章節
-       - ./mysql/sqls:/docker-entrypoint-initdb.d
+      - db-data:/var/lib/mysql
+      # docker hub mysql 文件說初次執行container時會執行 /docker-entrypoint-initdb.d 底下的 sql 檔案
+      # 預設把 table 建立在 MYSQL_DATABASE 環境變數指定的 DATABASE , 如果有多個sql檔案就按檔名的字母順序執行
+      # 參考文件: https://hub.docker.com/_/mysql 的 Initializing a fresh instance 章節
+      - ./mysql/sqls:/docker-entrypoint-initdb.d
     secrets:
-       - mysql_root_password
-       - mysql_password   
+      - mysql_root_password
+      - mysql_password
     healthcheck:
-      test: ['CMD-SHELL', 'mysqladmin ping -h 127.0.0.1 --password="$$(cat /run/secrets/mysql_root_password)" --silent']
+      test:
+        [
+          'CMD-SHELL',
+          'mysqladmin ping -h 127.0.0.1 --password="$$(cat /run/secrets/mysql_root_password)" --silent'
+        ]
       interval: 3s
       retries: 5
       start_period: 30s
     networks:
-       - backend
+      - backend
 
   proxy:
     build: proxy
     restart: always
     ports:
       - 80:80
-    depends_on: 
+    depends_on:
       - backend
     networks:
       - frontnet
@@ -67,14 +81,15 @@ services:
 # proxy 容器中 nginx 可以用backend這個名稱當做要proxy_pass的domain name
 networks:
   frontnet:
-  backend:   
+  backend:
 volumes:
-   db-data:
-secrets:              
-   mysql_root_password:
-      file: mysql/mysql_root_password.txt
-   mysql_password:
-      file: mysql/mysql_password.txt   
+  db-data:
+secrets:
+  mysql_root_password:
+    file: mysql/mysql_root_password.txt
+  mysql_password:
+    file: mysql/mysql_password.txt
+
 # The commented out section below is an example of how to define a PostgreSQL
 # database that your application can use. `depends_on` tells Docker Compose to
 # start the database before your application. The `db-data` volume persists the
@@ -107,4 +122,3 @@ secrets:
 # secrets:
 #   db-password:
 #     file: db/password.txt
-

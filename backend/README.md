@@ -31,6 +31,11 @@ py -m pip install -r backend/requirements.txt
 
 run
 
-flask --app backend/app run
+uvicorn backend.app.main:app
 
-gunicorn -w 3 -t 60  backend:app
+目錄結構參考:
+
+https://github.com/tiangolo/full-stack-fastapi-postgresql/tree/master
+
+
+
