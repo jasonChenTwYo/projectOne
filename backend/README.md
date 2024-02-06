@@ -28,10 +28,9 @@ python -m pip install -r backend/requirements.txt
 window:
 py -m pip install -r backend/requirements.txt
 
-
 run
 
-uvicorn backend.app.main:app
+uvicorn app.main:app
 
 目錄結構參考:
 
