@@ -3,3 +3,4 @@ mysql-connector-python==8.3.0
 python-multipart==0.0.7
 pytest==8.0.0
 uvicorn==0.27.0.post1
+httpx==0.26.0
