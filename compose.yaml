@@ -11,6 +11,8 @@ services:
 
   backend:
     restart: always
+    env_file:
+      - .env
     build:
       context: backend
     networks:
@@ -28,12 +30,8 @@ services:
   mongodb:
     image: mongo
     restart: always
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD_FILE: /run/secrets/mongo_root_password
-      MONGO_INITDB_DATABASE: projectOne
-      MONGO_USER: appuser
-      MONGO_PASSWORD: 1234567
+    env_file:
+      - .env
     volumes:
       - mongodb-data:/data/db
       - ./mongo/init:/docker-entrypoint-initdb.d
@@ -48,14 +46,8 @@ services:
   mysql:
     image: mysql
     restart: always
-    environment:
-      MYSQL_DATABASE: projectOne
-      MYSQL_USER: appuser
-      # 參考文件: https://hub.docker.com/_/mysql 的 Docker Secrets 章節
-      # 參考模板: https://github.com/docker/awesome-compose/blob/master/nginx-flask-mysql/compose.yaml
-      # 切記secrets 要宣告最上層跟容器內都要
-      MYSQL_PASSWORD_FILE: /run/secrets/mysql_password
-      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_password
+    env_file:
+      - .env
     # 避免 warning: World-writable config file my.cnf is ignored
     # mysql 會覺得這個文件會容易被修改，所以需要管制
     # 755  要更改目錄權限，以確保 MySQL 使用者和其所在群組具有讀取和執行權限。 
