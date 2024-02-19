@@ -1,10 +1,16 @@
-from dataclasses import dataclass
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, EmailStr
+from uuid import UUID
+from datetime import datetime
+
 
 class User(BaseModel):
-    id: int
-    hashed_password: str
-  
+    user_name: str
+    email: EmailStr
+
+
 class Token(BaseModel):
-    access_token: str
+    access_token: UUID
+    access_token_expires_at: datetime
+    refresh_token: UUID
+    refresh_token_expires_at: datetime
     token_type: str = "bearer"

@@ -32,9 +32,17 @@ run
 
 uvicorn app.main:app
 
+window:
+
+py -m uvicorn app.main:app 
+
 目錄結構參考:
 
 https://github.com/tiangolo/full-stack-fastapi-postgresql/tree/master
 
 
+test
 
+window:
+
+py -m pytest

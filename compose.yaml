@@ -10,6 +10,7 @@
 services:
 
   backend:
+    restart: always
     build:
       context: backend
     networks:
@@ -18,18 +19,30 @@ services:
     secrets:
       - mysql_password
     depends_on:
-      redis:
+      mongodb:
         condition: service_started
       mysql:
         condition: service_healthy
-      
-    
-  redis:
-    image: 'redislabs/redismod'
-    ports:
-      - '6379:6379'
-    networks:  
+
+  # https://hub.docker.com/_/mongo
+  mongodb:
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD_FILE: /run/secrets/mongo_root_password
+      MONGO_INITDB_DATABASE: projectOne
+      MONGO_USER: appuser
+      MONGO_PASSWORD: 1234567
+    volumes:
+      - mongodb-data:/data/db
+      - ./mongo/init:/docker-entrypoint-initdb.d
+    networks:
       - backend
+    secrets:
+      - mongo_root_password
+    ports:
+      - 27017:27017
 
   # https://hub.docker.com/_/mysql
   mysql:
@@ -43,6 +56,14 @@ services:
       # 切記secrets 要宣告最上層跟容器內都要
       MYSQL_PASSWORD_FILE: /run/secrets/mysql_password
       MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_password
+    # 避免 warning: World-writable config file my.cnf is ignored
+    # mysql 會覺得這個文件會容易被修改，所以需要管制
+    # 755  要更改目錄權限，以確保 MySQL 使用者和其所在群組具有讀取和執行權限。 
+    # 644  要更改文件權限，確保配置文件對 MySQL 使用者和其所在群組可讀取，但其他使用者無法寫入。
+    command: >
+      bash -c "chmod 644 /etc/mysql/conf.d/my.cnf &&  
+               chmod 755 /etc/mysql/conf.d &&
+               docker-entrypoint.sh mysqld"  
     ports:
       - 3306:3306
     volumes:
@@ -51,6 +72,8 @@ services:
       # 預設把 table 建立在 MYSQL_DATABASE 環境變數指定的 DATABASE , 如果有多個sql檔案就按檔名的字母順序執行
       # 參考文件: https://hub.docker.com/_/mysql 的 Initializing a fresh instance 章節
       - ./mysql/sqls:/docker-entrypoint-initdb.d
+      # 亂碼問題 https://ithelp.ithome.com.tw/articles/10221541
+      - ./mysql/conf:/etc/mysql/conf.d
     secrets:
       - mysql_root_password
       - mysql_password
@@ -84,11 +107,14 @@ networks:
   backend:
 volumes:
   db-data:
+  mongodb-data:
 secrets:
   mysql_root_password:
     file: mysql/mysql_root_password.txt
   mysql_password:
     file: mysql/mysql_password.txt
+  mongo_root_password:
+    file: mongo/mongo_root_password.txt
 
 # The commented out section below is an example of how to define a PostgreSQL
 # database that your application can use. `depends_on` tells Docker Compose to
