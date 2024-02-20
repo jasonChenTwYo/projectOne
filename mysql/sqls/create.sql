@@ -1,4 +1,4 @@
--- 修改用戶表
+-- 用戶表
 create table users (
     user_id char(36) primary key comment '用戶ID，主鍵，UUID',
     user_name varchar(255) not null comment '用戶名，不允許為空',
@@ -7,13 +7,13 @@ create table users (
     create_time timestamp default current_timestamp comment '創建時間，默認為當前時間戳'
 ) comment='用戶資訊表';
 
--- 修改影片分類表
+-- 影片分類表
 create table categories (
     category_id char(36) primary key comment '分類ID，主鍵，UUID',
     category_name varchar(255) not null comment '分類名稱，不允許為空'
 ) comment='影片分類資訊表';
 
--- 修改影片表
+-- 影片表
 create table videos (
     video_id char(36) primary key comment '影片ID，主鍵，UUID',
     user_id char(36) comment '用戶ID，外鍵，引用用戶表的user_id',
@@ -27,7 +27,7 @@ create table videos (
     foreign key (category_id) references categories(category_id)
 ) comment='影片資訊表';
 
--- 修改評論表
+-- 評論表
 create table comments (
     comment_id char(36) primary key comment '評論ID，主鍵，UUID',
     video_id char(36) comment '影片ID，外鍵，引用影片表的video_id',
@@ -38,7 +38,7 @@ create table comments (
     foreign key (user_id) references users(user_id)
 ) comment='用戶評論資訊表';
 
--- 修改用戶觀看歷史表
+-- 用戶觀看歷史表
 create table watch_history (
     watch_id char(36) primary key comment '觀看記錄ID，主鍵，UUID',
     user_id char(36) comment '用戶ID，外鍵，引用用戶表的user_id',
