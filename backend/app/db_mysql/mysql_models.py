@@ -16,19 +16,27 @@ class UserTable(SQLModel, table=True):
     create_time: datetime = Field(default_factory=lambda: datetime.today())
 
 
-# class Category(SQLModel, table=True):
-#     id: UUID = Field(default_factory=lambda: uuid4(), primary_key=True)
-#     category_name: str
+class CategoryTable(SQLModel, table=True):
+    __tablename__ = "categories"
+    model_config = ConfigDict(from_attributes=True)
 
-# class Video(SQLModel, table=True):
-#     id: UUID = Field(default_factory=lambda: uuid4(), primary_key=True)
-#     user_id: UUID = Field(foreign_key="user.id")
-#     category_id: UUID = Field(foreign_key="category.id")
-#     title: str
-#     description: Optional[str] = None
-#     upload_time: Optional[str] = Field(default=None)
-#     video_path: str
-#     thumbnail_path: str
+    category_id: UUID = Field(default_factory=lambda: uuid4(), primary_key=True)
+    category_name: str
+
+
+class VideoTable(SQLModel, table=True):
+    __tablename__ = "videos"
+    model_config = ConfigDict(from_attributes=True)
+
+    video_id: UUID = Field(default_factory=lambda: uuid4(), primary_key=True)
+    user_id: UUID = Field(foreign_key="user.id")
+    category_id: UUID = Field(foreign_key="category.id")
+    title: str
+    description: Optional[str] = None
+    upload_time: Optional[str] = Field(default_factory=lambda: datetime.today())
+    video_path: str
+    thumbnail_path: str
+
 
 # class Comment(SQLModel, table=True):
 #     id: UUID = Field(default_factory=lambda: uuid4(), primary_key=True)

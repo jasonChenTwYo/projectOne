@@ -1,12 +1,12 @@
 from odmantic import AIOEngine, SyncEngine
 from motor.motor_asyncio import AsyncIOMotorClient
 from pymongo import MongoClient
-import os
+from app.config.config import settings
 
-db = os.getenv("MONGO_INITDB_DATABASE", "projectOne")
-host = os.getenv("MONGODB_HOST", "localhost")
-user = os.getenv("MONGO_USER", "appuser")
-passward = os.getenv("MONGO_PASSWORD", "1234567")
+db = settings.MONGO_INITDB_DATABASE
+host = settings.MONGODB_HOST
+user = settings.MONGO_USER
+passward = settings.MONGO_PASSWORD
 
 async_client = AsyncIOMotorClient(f"mongodb://{user}:{passward}@{host}:27017/{db}")
 async_engine = AIOEngine(client=async_client, database=db)

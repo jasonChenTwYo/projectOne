@@ -11,6 +11,10 @@ from uuid import uuid4
 from app.api.utils import get_password_hash, verify_password
 from app.db_mysql.mysql_userdao import create_user, find_user_by_email
 from app.db_mongodb import mongodb_sync_dao, mongodb_async_dao
+import os
+from pathlib import Path
+
+from app.config.config import settings
 
 router = APIRouter()
 
@@ -47,6 +51,8 @@ def register(request: RegisterRequest):
     request.password_hash = get_password_hash(request.password_hash)
     user = UserTable.model_validate(request)
 
-    create_user(user)
+    user = create_user(user)
+
+    os.makedirs(Path(settings.VIDEO_BASE_PATH) / str(user.user_id))
 
     return {"message": "success"}

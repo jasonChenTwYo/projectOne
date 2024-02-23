@@ -4,6 +4,7 @@ from app.api.router import api_router
 import logging
 import traceback
 from sqlalchemy.exc import NoResultFound
+from fastapi.staticfiles import StaticFiles
 
 logging.basicConfig(
     format="[%(asctime)s] %(levelname)s in %(module)s:%(lineno)d: %(message)s",
@@ -13,7 +14,8 @@ logging.basicConfig(
 app = FastAPI()
 
 # app.include_router(api_router,prefix="/")
-app.include_router(api_router)
+app.include_router(api_router, prefix="/api")
+app.mount("/api/img", StaticFiles(directory="static/img"), name="static")
 
 
 @app.get("/")

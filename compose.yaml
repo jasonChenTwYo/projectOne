@@ -25,6 +25,8 @@ services:
       - backend
     secrets:
       - mysql_password
+    volumes:
+      - ./backend/static:/app/static
     depends_on:
       mongodb:
         condition: service_started

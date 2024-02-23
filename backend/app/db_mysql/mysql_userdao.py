@@ -16,3 +16,5 @@ def create_user(user: UserTable):
         # https://docs.pydantic.dev/latest/concepts/models/#helper-functions
         session.add(user)
         session.commit()
+        session.refresh(user)
+        return user
