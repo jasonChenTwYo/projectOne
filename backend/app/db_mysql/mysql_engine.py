@@ -1,4 +1,4 @@
-from sqlmodel import create_engine
+from sqlmodel import create_engine, Session
 
 
 from app.config.config import settings
@@ -16,3 +16,8 @@ with open(settings.MYSQL_PASSWORD_FILE, "r") as file:
 DATABASE_URL = f"mysql+pymysql://{user}:{mysql_password}@{host}/{database}"
 
 engine = create_engine(DATABASE_URL, echo=True)
+
+
+def get_session():
+    with Session(engine) as session:
+        yield session

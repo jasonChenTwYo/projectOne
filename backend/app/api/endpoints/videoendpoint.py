@@ -2,9 +2,12 @@ from fastapi import APIRouter, Request, HTTPException, Query, Path, Depends
 from fastapi.responses import FileResponse, StreamingResponse
 from typing import Annotated
 import logging
+
+from sqlmodel import Session
 from app.api.service.video_service import play_video_service, upload_video_service
 from app.api.deps import CurrentToken
 from app.api.request import PlayVideoRequest, UploadVideoForm
+from app.db_mysql.mysql_engine import get_session
 
 router = APIRouter()
 
@@ -22,7 +25,10 @@ def play_video(
 
 @router.post("/upload-video")
 def upload_video(
-    formdata: Annotated[UploadVideoForm, Depends()], current_token: CurrentToken
+    *,
+    session: Session = Depends(get_session),
+    formdata: Annotated[UploadVideoForm, Depends()],
+    current_token: CurrentToken,
 ):
 
-    return upload_video_service.upload_video(formdata, current_token)
+    return upload_video_service.upload_video(formdata, current_token, session)

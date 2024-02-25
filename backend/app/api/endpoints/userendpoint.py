@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException, status, Depends
+from sqlmodel import Session
 from app.api.deps import CurrentToken
 from app.models import Token
 from app.db_mysql.mysql_models import UserTable
@@ -15,15 +16,18 @@ import os
 from pathlib import Path
 
 from app.config.config import settings
+from app.db_mysql.mysql_engine import get_session
 
 router = APIRouter()
 
 
 @router.post("/login/access-token")
 def login_access_token(
+    *,
+    session: Session = Depends(get_session),
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
 ) -> Token:
-    user = find_user_by_email(form_data.username)
+    user = find_user_by_email(form_data.username, session)
 
     if not verify_password(form_data.password, user.password_hash):
         logging.error("驗證失敗")
@@ -46,12 +50,12 @@ async def logout(current_token: CurrentToken):
 
 
 @router.post("/register", response_model=RegisterResponse)
-def register(request: RegisterRequest):
+def register(*, session: Session = Depends(get_session), request: RegisterRequest):
 
     request.password_hash = get_password_hash(request.password_hash)
     user = UserTable.model_validate(request)
 
-    user = create_user(user)
+    user = create_user(user, session)
 
     os.makedirs(Path(settings.VIDEO_BASE_PATH) / str(user.user_id))
     os.makedirs(Path(settings.IMG_BASE_PATH) / str(user.user_id))

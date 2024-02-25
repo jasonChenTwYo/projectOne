@@ -7,13 +7,18 @@ from pathlib import Path
 from fastapi import UploadFile
 from app.db_mysql.mysql_models import VideoTable
 from sqlmodel import Session
-from app.db_mysql.mysql_engine import engine
+import os,logging
 
-def upload_video(formdata:UploadVideoForm,current_token: CurrentToken):
+def upload_video(formdata:UploadVideoForm,current_token: CurrentToken,session:Session):
+
+    if not os.path.exists(Path(settings.VIDEO_BASE_PATH) / current_token.user_id):
+        os.makedirs(Path(settings.VIDEO_BASE_PATH) / current_token.user_id)
+    if not os.path.exists(Path(settings.IMG_BASE_PATH) / current_token.user_id):
+        os.makedirs(Path(settings.IMG_BASE_PATH) / current_token.user_id)
 
     video_name = f"{str(uuid4())}_{datetime.now().strftime("%Y%m%d%H%M%S")}"
     thumbnail_name = f"{str(uuid4())}_{datetime.now().strftime("%Y%m%d%H%M%S")}.{get_file_extension(formdata.thumbnail_file)}"
-
+   
     video_talbe=VideoTable.model_validate({"user_id":current_token.user_id,
                                            "title": formdata.title,
                                            "description" : formdata.description,
@@ -21,14 +26,11 @@ def upload_video(formdata:UploadVideoForm,current_token: CurrentToken):
                                            "video_path" : video_name,
                                            "thumbnail_path" : thumbnail_name,
                                            })
-    with Session(engine) as session:
-        session.begin()
-        session.add(video_talbe)
-        write_video_and_thumbnail(current_token.user_id,video_name,thumbnail_name,
+    session.add(video_talbe)
+    write_video_and_thumbnail(current_token.user_id,video_name,thumbnail_name,
                                   formdata.video_file,formdata.thumbnail_file)
-        session.commit()
+    session.commit()
 
- 
     return {"message": "success", "video_name": video_name}
 
 
@@ -37,19 +39,32 @@ def get_file_extension(file: UploadFile) -> str:
     filename = file.filename
 
     extension = filename.split('.')[-1] if '.' in filename else ''
+    
     return extension
 
 def write_video_and_thumbnail(user_id:str,video_name:str,thumbnail_name:str,video_file:UploadFile,thumbnail_file:UploadFile):
     video_name = f"{video_name}.mp4"
+    video_path = Path(settings.VIDEO_BASE_PATH) /user_id/video_name
     thumbnail_name = f"{thumbnail_name}.{get_file_extension(thumbnail_file)}"
-    with open(
-        Path(settings.IMG_BASE_PATH) /user_id/thumbnail_name,
-        "wb+",
-    ) as file_object:
-        file_object.write(thumbnail_file.file.read())
+    thumbnail_path =  Path(settings.IMG_BASE_PATH) /user_id/thumbnail_name
 
-    with open(
-        Path(settings.VIDEO_BASE_PATH) /user_id/video_name,
-        "wb+",
-    ) as file_object:
-        file_object.write(video_file.file.read())
+    try:
+        with open(
+            thumbnail_path,
+            "wb+",
+        ) as file_object:
+            file_object.write(thumbnail_file.file.read())
+
+        with open(
+            video_path,
+            "wb+",
+        ) as file_object:
+            file_object.write(video_file.file.read())
+    except Exception as e:
+        logging.exception("create error")
+        if thumbnail_path.exists():
+            os.remove(thumbnail_path)
+        if video_path.exists():
+            os.remove(video_path)
+        raise e
+
