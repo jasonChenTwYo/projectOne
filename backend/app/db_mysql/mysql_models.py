@@ -29,8 +29,8 @@ class VideoTable(SQLModel, table=True):
     model_config = ConfigDict(from_attributes=True)
 
     video_id: UUID = Field(default_factory=lambda: uuid4(), primary_key=True)
-    user_id: UUID = Field(foreign_key="user.id")
-    category_id: UUID = Field(foreign_key="category.id")
+    user_id: UUID
+    category_id: UUID
     title: str
     description: Optional[str] = None
     upload_time: Optional[str] = Field(default_factory=lambda: datetime.today())

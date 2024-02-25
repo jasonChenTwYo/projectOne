@@ -1,4 +1,6 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, status
+from fastapi.encoders import jsonable_encoder
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from app.api.router import api_router
 import logging
@@ -40,4 +42,14 @@ async def exception_handler(request: Request, exc: Exception):
     return JSONResponse(
         status_code=500,
         content={"message": (f"Failed method {request.method} at URL {request.url}.")},
+    )
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    logging.error(f"Failed method {request.method} at URL {request.url}.")
+    logging.error(f"detail {exc.errors()}, {type(exc)=}")
+    return JSONResponse(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        content=jsonable_encoder({"detail": exc.errors()}),
     )

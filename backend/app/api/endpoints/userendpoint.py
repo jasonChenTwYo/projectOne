@@ -54,5 +54,6 @@ def register(request: RegisterRequest):
     user = create_user(user)
 
     os.makedirs(Path(settings.VIDEO_BASE_PATH) / str(user.user_id))
+    os.makedirs(Path(settings.IMG_BASE_PATH) / str(user.user_id))
 
     return {"message": "success"}

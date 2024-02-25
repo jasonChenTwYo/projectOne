@@ -3,14 +3,15 @@ from pathlib import Path
 from typing import Optional
 from fastapi.responses import StreamingResponse
 from fastapi import HTTPException
-
+from app.api.request import PlayVideoRequest
 from app.config.config import settings
 
 
 def play_video(
-    range_header: Optional[str], video_name: str, group_id: str
+    range_header: Optional[str], play_video_request: PlayVideoRequest
 ) -> StreamingResponse:
-
+    video_name = play_video_request.video_name
+    group_id = play_video_request.group_id
     if not validate_inputs([video_name, group_id]):
         raise HTTPException(status_code=400, detail="file name invalid")
 
