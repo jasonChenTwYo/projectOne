@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import SideNav from "./ui/common/SideNav";
+import TopBar from "./ui/common/TopBar";
+import clsx from "clsx";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -16,7 +19,17 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className={clsx(inter.className, "flex flex-col h-screen")}>
+        <div className="flex justify-end items-center px-4 h-12 bg-blue-400 w-full">
+          <TopBar />
+        </div>
+        <div className="flex flex-row h-full">
+          <div className="w-full flex-none md:w-64 bg-blue-400">
+            <SideNav />
+          </div>
+          <div>{children}</div>
+        </div>
+      </body>
     </html>
   );
 }

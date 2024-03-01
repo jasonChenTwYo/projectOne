@@ -12,18 +12,17 @@ export default function Page() {
 
   //   fetchVideo();
   // }, []);
+
   let videoUrl =
-    "/api/play-video/4600e2af-1dff-473e-8469-4dc941c265ec_20240224023355?group_id=1baa5def-5419-451c-85ef-82ef10766dfc";
+    "/api/play-video/2eaf1b1f-f484-453b-b3a6-eda3bb0a13d4_20240225235647?group_id=1baa5def-5419-451c-85ef-82ef10766dfc";
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen py-2">
-      <main className="flex flex-col items-center justify-center w-full flex-1 px-20 text-center">
-        <video
-          src={videoUrl}
-          controls
-          width="80%"
-          poster="/api/img/Folder.jpg"
-        ></video>
-      </main>
-    </div>
+    <main className="flex flex-col items-center justify-center w-full flex-1 px-20 text-center py-20">
+      <video
+        src={videoUrl}
+        controls
+        width="80%"
+        // poster="/api/img/Folder.jpg"
+      ></video>
+    </main>
   );
 }
