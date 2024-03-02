@@ -1,15 +1,47 @@
 "use client";
 import { useFormState } from "react-dom";
-import { authenticate, uploadVideo } from "../../service/action";
-
+// import { authenticate } from "../../service/action";
+import { AuthError } from "next-auth";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
 export default function Page() {
+  const router = useRouter();
   const [errorMessage, dispatch] = useFormState(authenticate, undefined);
-  const initialState = { message: "", erros: {} };
-  const [state, formAction] = useFormState(uploadVideo, initialState);
+
+  async function authenticate(
+    prevState: string | undefined,
+    formData: FormData
+  ) {
+    try {
+      const res = await signIn("credentials", {
+        redirect: false,
+        email: formData.get("email"),
+        password: formData.get("password"),
+      });
+      if (!res?.error) {
+        router.push("/");
+        router.refresh();
+        return "success";
+      } else {
+        return "error";
+      }
+    } catch (error) {
+      if (error instanceof AuthError) {
+        switch (error.type) {
+          case "CredentialsSignin":
+            return "Invalid credentials.";
+          default:
+            return "Something went wrong.";
+        }
+      }
+      throw error;
+    }
+  }
+
   return (
-    <main className="container mx-auto bg-white">
+    <main className="container mx-auto bg-white py-20">
       {errorMessage}
-      <form className="space-y-3">
+      <form className="flex items-center">
         <div className="w-full">
           <div>
             <label
@@ -48,7 +80,6 @@ export default function Page() {
               />
             </div>
           </div>
-          {state?.message ? state.message : "无消息"}
           <button formAction={dispatch} type="submit" className="mt-4 w-full">
             Log in
           </button>

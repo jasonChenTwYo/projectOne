@@ -51,7 +51,7 @@ export async function authenticate(
 ) {
   try {
     const res = await signIn("credentials", {
-      callbackUrl: "/",
+      redirect: false,
       email: formData.get("email"),
       password: formData.get("password"),
     });

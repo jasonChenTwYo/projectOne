@@ -24,10 +24,10 @@ export default function RootLayout({
           <TopBar />
         </div>
         <div className="flex flex-row h-full">
-          <div className="w-full flex-none md:w-64 bg-blue-400">
+          <div className="w-full flex-none md:w-64 bg-neutral-400">
             <SideNav />
           </div>
-          <div>{children}</div>
+          <div className="grow">{children}</div>
         </div>
       </body>
     </html>

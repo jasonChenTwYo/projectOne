@@ -1,16 +1,16 @@
 "use client";
 import Link from "next/link";
-import {
-  ArrowUpTrayIcon,
-  HomeIcon,
-  ArrowRightStartOnRectangleIcon,
-  ArrowLeftStartOnRectangleIcon,
-} from "@heroicons/react/24/solid";
+import { HomeIcon } from "@heroicons/react/24/solid";
 import clsx from "clsx";
 import { usePathname } from "next/navigation";
 // ...
-export default function NavLinks() {
-  const links = [{ name: "Home", href: "/", icon: HomeIcon }];
+
+export default function SideNav() {
+  const links = [
+    { name: "Home", href: "/", icon: HomeIcon },
+    { name: "Home", href: "/x", icon: HomeIcon },
+    { name: "Home", href: "/f", icon: HomeIcon },
+  ];
 
   const pathname = usePathname();
 
@@ -24,9 +24,9 @@ export default function NavLinks() {
             href={link.href}
             className={clsx(
               "flex h-[48px] grow items-center justify-center gap-2 rounded-md p-3 text-sm font-medium md:flex-none md:justify-start md:p-2 md:px-3",
-              "bg-gray-50 hover:bg-amber-500 hover:text-orange-600",
+              " hover:bg-stone-500 hover:text-orange-600",
               {
-                "bg-amber-500 text-orange-600": pathname === link.href,
+                "bg-stone-500 text-orange-600": pathname === link.href,
               }
             )}
           >

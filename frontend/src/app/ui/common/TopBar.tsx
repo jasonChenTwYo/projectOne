@@ -6,6 +6,7 @@ import {
 } from "@heroicons/react/24/solid";
 import clsx from "clsx";
 import { auth, signOut } from "@/common/config/auth.config";
+import { signOutApi } from "@/service/api";
 
 // ...
 export default async function TopBar() {
@@ -46,7 +47,11 @@ export default async function TopBar() {
         <form
           action={async () => {
             "use server";
-            await signOut();
+            const response = await signOutApi();
+            console.log(response.message);
+            if (response.message === "logoutSuccess") {
+              await signOut({ redirectTo: "/" });
+            }
           }}
         >
           <button

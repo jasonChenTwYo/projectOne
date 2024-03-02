@@ -16,7 +16,7 @@ export default function Page() {
   let videoUrl =
     "/api/play-video/2eaf1b1f-f484-453b-b3a6-eda3bb0a13d4_20240225235647?group_id=1baa5def-5419-451c-85ef-82ef10766dfc";
   return (
-    <main className="flex flex-col items-center justify-center w-full flex-1 px-20 text-center py-20">
+    <main className="container mx-auto py-20">
       <video
         src={videoUrl}
         controls

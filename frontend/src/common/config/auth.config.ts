@@ -14,6 +14,7 @@ declare module "next-auth" {
 }
 
 const authConfig = {
+  trustHost: true,
   session: { strategy: "jwt" },
   pages: {
     signIn: "/login",
@@ -27,12 +28,13 @@ const authConfig = {
 
         if (parsedCredentials.success) {
           const { email, password } = parsedCredentials.data;
-
           const formData = new FormData();
           formData.append("username", email);
           formData.append("password", password);
           const authResponse = await fetch(
-            "http://127.0.0.1:8000/api/login/access-token",
+            `${
+              process.env.PROXY_HOST ?? "http://127.0.0.1:8000"
+            }/api/login/access-token`,
             {
               method: "POST",
               body: formData,
@@ -55,7 +57,7 @@ const authConfig = {
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
-      const isOnDashboard = nextUrl.pathname.startsWith("/video");
+      const isOnDashboard = nextUrl.pathname.startsWith("/video/upload");
       if (isOnDashboard) {
         if (isLoggedIn) return true;
         return false; // Redirect unauthenticated users to login page

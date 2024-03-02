@@ -1,17 +1,28 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
+import { auth } from "@/common/config/auth.config";
+import axios, {
+  AxiosError,
+  AxiosInstance,
+  AxiosRequestConfig,
+  AxiosResponse,
+} from "axios";
 import { useSession, getSession } from "next-auth/react";
-// 定義 API 響應類型
-interface ApiResponse<T> {
-  data: T;
-  // 可以根據需要添加其他屬性
+
+interface ApiInstance {
+  customHeaders?: Record<string, string>;
+  isAuth?: boolean;
+}
+
+interface LogOutResponse {
+  message: string;
 }
 
 // 創建一個函數來生成 Axios 實例
 function createApiInstance(
-  customHeaders?: Record<string, string>,
-  isAuth?: boolean
+  { customHeaders, isAuth }: ApiInstance = {
+    customHeaders: { "Content-Type": "application/json" },
+    isAuth: false,
+  }
 ): AxiosInstance {
-  customHeaders = customHeaders ?? { "Content-Type": "application/json" };
   const instance = axios.create({
     // baseURL: "https://your-api-base-url.com",
     // 預設 headers
@@ -23,7 +34,8 @@ function createApiInstance(
   instance.interceptors.request.use(
     async (config) => {
       if (isAuth) {
-        const session = await getSession();
+        const isServer = typeof window === "undefined";
+        const session = isServer ? await auth() : await getSession();
         if (!session?.access_token) {
           console.log("access_token not find");
           throw Error("access_token not find");
@@ -51,13 +63,29 @@ function createApiInstance(
 export const uploadVideoApi = async (
   formData: FormData
 ): Promise<AxiosResponse> => {
-  const api = createApiInstance(
-    {
+  const api = createApiInstance({
+    customHeaders: {
       "Content-Type": "multipart/form-data",
     },
-    true
-  );
+    isAuth: true,
+  });
   return api
     .post<AxiosResponse>("/api/upload-video", formData)
     .then((res: AxiosResponse) => res.data);
+};
+
+export const signOutApi = async (): Promise<LogOutResponse> => {
+  const api = createApiInstance({ isAuth: true });
+  return api
+    .post<LogOutResponse>(
+      `${process.env.PROXY_HOST ?? "http://127.0.0.1:8000"}/api/logout`
+    )
+    .then((res) => res.data)
+    .catch((error: AxiosError<{ detail?: string }>) => {
+      console.error("response data:", error.response?.data);
+      if (error.response?.data?.detail === "not found") {
+        return { message: "logoutSuccess" };
+      }
+      return { message: "fail" };
+    });
 };
