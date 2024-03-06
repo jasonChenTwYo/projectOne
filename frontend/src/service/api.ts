@@ -1,4 +1,5 @@
-import { auth } from "@/common/config/auth.config";
+import { auth } from "@/lib/config/auth.config";
+import { VideoInfo } from "@/lib/redux/features/videoInfoSlice";
 import axios, {
   AxiosError,
   AxiosInstance,
@@ -14,6 +15,18 @@ interface ApiInstance {
 
 interface LogOutResponse {
   message: string;
+}
+
+interface RegisterResponse {
+  message: string;
+}
+
+interface GetHomeVideoResponse {
+  video_list: VideoInfo[];
+}
+
+interface GetVideoInfoResponse {
+  video_info: VideoInfo;
 }
 
 // 創建一個函數來生成 Axios 實例
@@ -54,6 +67,7 @@ function createApiInstance(
   );
 
   instance.interceptors.response.use((response: AxiosResponse) => {
+    console.log("response data:", response.data);
     // 在這裡可以添加響應後的邏輯
     return response;
   });
@@ -74,6 +88,40 @@ export const uploadVideoApi = async (
     .then((res: AxiosResponse) => res.data);
 };
 
+export const registerApi = async (
+  formData: FormData
+): Promise<RegisterResponse> => {
+  const api = createApiInstance();
+  return api
+    .post<RegisterResponse>("/api/register", formDataToJson(formData))
+    .then((res) => res.data)
+    .catch((error: AxiosError) => {
+      return { message: "fail" };
+    });
+};
+
+export const getHomeVideoApi = async (): Promise<GetHomeVideoResponse> => {
+  const api = createApiInstance();
+  return api
+    .get<GetHomeVideoResponse>("/api/home/get-video")
+    .then((res) => res.data)
+    .catch((error: AxiosError) => {
+      return { video_list: [] };
+    });
+};
+
+export const getVideoInfoApi = async (
+  video_id: string
+): Promise<GetVideoInfoResponse> => {
+  const api = createApiInstance();
+  return api
+    .get<GetVideoInfoResponse>(`/api/get-video/${video_id}`)
+    .then((res) => res.data)
+    .catch((error: AxiosError) => {
+      return { video_info: {} };
+    });
+};
+
 export const signOutApi = async (): Promise<LogOutResponse> => {
   const api = createApiInstance({ isAuth: true });
   return api
@@ -82,10 +130,14 @@ export const signOutApi = async (): Promise<LogOutResponse> => {
     )
     .then((res) => res.data)
     .catch((error: AxiosError<{ detail?: string }>) => {
-      console.error("response data:", error.response?.data);
       if (error.response?.data?.detail === "not found") {
         return { message: "logoutSuccess" };
       }
       return { message: "fail" };
     });
 };
+
+function formDataToJson(formData: FormData): string {
+  const object = Object.fromEntries(formData.entries());
+  return JSON.stringify(object);
+}

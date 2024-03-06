@@ -1,10 +1,6 @@
 import { z } from "zod";
 import { uploadVideoApi } from "@/service/api";
 
-import { AuthError } from "next-auth";
-import { signIn } from "next-auth/react";
-//import { signIn } from "@/app/api/auth/[...nextauth]/route";
-// import { signIn } from "@/common/config/auth.config";
 const uploadVideoSchema = z.object({
   title: z.string({
     invalid_type_error: "Invalid title",
@@ -32,6 +28,7 @@ export async function uploadVideo(prevState: State, formData: FormData) {
 
   try {
     const response = await uploadVideoApi(formData);
+    console.log(`response.status:${response.status}`);
     if (response.status === 200) {
       console.log("影片上傳成功");
       return { message: "影片上傳成功" };
@@ -42,35 +39,5 @@ export async function uploadVideo(prevState: State, formData: FormData) {
   } catch (error) {
     console.error("請求錯誤", error);
     return { message: "請求錯誤" };
-  }
-}
-
-export async function authenticate(
-  prevState: string | undefined,
-  formData: FormData
-) {
-  try {
-    const res = await signIn("credentials", {
-      redirect: false,
-      email: formData.get("email"),
-      password: formData.get("password"),
-    });
-    if (!res?.error) {
-      // 认证成功
-      return "success";
-    } else {
-      // 认证失败，处理错误
-      return "error";
-    }
-  } catch (error) {
-    if (error instanceof AuthError) {
-      switch (error.type) {
-        case "CredentialsSignin":
-          return "Invalid credentials.";
-        default:
-          return "Something went wrong.";
-      }
-    }
-    throw error;
   }
 }

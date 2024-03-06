@@ -5,11 +5,14 @@ from uuid import uuid4
 from datetime import datetime
 from pathlib import Path
 from fastapi import UploadFile
-from app.db_mysql.mysql_models import VideoTable
+from app.db_mysql.mysql_models import VideoTable,CategoryTable
 from sqlmodel import Session
 import os,logging
 
 def upload_video(formdata:UploadVideoForm,current_token: CurrentToken,session:Session):
+
+    categoryOne = CategoryTable(category_name="巨乳")
+    categoryTwo = CategoryTable(category_name="Tifa")
 
     if not os.path.exists(Path(settings.VIDEO_BASE_PATH) / current_token.user_id):
         os.makedirs(Path(settings.VIDEO_BASE_PATH) / current_token.user_id)
@@ -22,10 +25,11 @@ def upload_video(formdata:UploadVideoForm,current_token: CurrentToken,session:Se
     video_talbe=VideoTable.model_validate({"user_id":current_token.user_id,
                                            "title": formdata.title,
                                            "description" : formdata.description,
-                                           "category_id" : formdata.category_id,
                                            "video_path" : video_name,
                                            "thumbnail_path" : thumbnail_name,
                                            })
+    video_talbe.categories= [categoryOne,categoryTwo]
+    logging.info(f"{video_talbe=}")
     session.add(video_talbe)
     write_video_and_thumbnail(current_token.user_id,video_name,thumbnail_name,
                                   formdata.video_file,formdata.thumbnail_file)
@@ -45,7 +49,7 @@ def get_file_extension(file: UploadFile) -> str:
 def write_video_and_thumbnail(user_id:str,video_name:str,thumbnail_name:str,video_file:UploadFile,thumbnail_file:UploadFile):
     video_name = f"{video_name}.mp4"
     video_path = Path(settings.VIDEO_BASE_PATH) /user_id/video_name
-    thumbnail_name = f"{thumbnail_name}.{get_file_extension(thumbnail_file)}"
+    thumbnail_name = f"{thumbnail_name}"
     thumbnail_path =  Path(settings.IMG_BASE_PATH) /user_id/thumbnail_name
 
     try:

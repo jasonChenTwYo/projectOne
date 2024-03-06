@@ -1,12 +1,12 @@
-from typing import Optional
+from typing import Optional, List
 from uuid import UUID, uuid4
-from sqlmodel import SQLModel, Field, Column, String
+from sqlmodel import Relationship, SQLModel, Field, Column, String
 from datetime import datetime
 from pydantic import ConfigDict, EmailStr
 
 
 class UserTable(SQLModel, table=True):
-    __tablename__ = "users"
+    __tablename__ = "user"
     model_config = ConfigDict(from_attributes=True)
 
     user_id: UUID = Field(default_factory=lambda: uuid4(), primary_key=True)
@@ -16,8 +16,16 @@ class UserTable(SQLModel, table=True):
     create_time: datetime = Field(default_factory=lambda: datetime.today())
 
 
+class VideoCategoryAssociationTable(SQLModel, table=True):
+    __tablename__ = "video_category_association"
+    model_config = ConfigDict(from_attributes=True)
+
+    video_id: UUID = Field(foreign_key="video.video_id", primary_key=True)
+    category_id: UUID = Field(foreign_key="category.category_id", primary_key=True)
+
+
 class CategoryTable(SQLModel, table=True):
-    __tablename__ = "categories"
+    __tablename__ = "category"
     model_config = ConfigDict(from_attributes=True)
 
     category_id: UUID = Field(default_factory=lambda: uuid4(), primary_key=True)
@@ -25,17 +33,20 @@ class CategoryTable(SQLModel, table=True):
 
 
 class VideoTable(SQLModel, table=True):
-    __tablename__ = "videos"
+    __tablename__ = "video"
     model_config = ConfigDict(from_attributes=True)
 
     video_id: UUID = Field(default_factory=lambda: uuid4(), primary_key=True)
-    user_id: UUID
-    category_id: UUID
+    user_id: UUID = Field(foreign_key="user.user_id")
     title: str
-    description: Optional[str] = None
-    upload_time: Optional[str] = Field(default_factory=lambda: datetime.today())
+    description: Optional[str]
+    upload_time: datetime = Field(default_factory=lambda: datetime.today())
     video_path: str
     thumbnail_path: str
+
+    categories: List[CategoryTable] = Relationship(
+        link_model=VideoCategoryAssociationTable
+    )
 
 
 # class Comment(SQLModel, table=True):

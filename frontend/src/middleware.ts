@@ -1,4 +1,4 @@
-import { auth } from "./common/config/auth.config";
+import { auth } from "./lib/config/auth.config";
 
 export default auth;
 

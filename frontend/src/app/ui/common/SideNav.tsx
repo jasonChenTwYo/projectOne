@@ -1,16 +1,31 @@
 "use client";
 import Link from "next/link";
-import { HomeIcon } from "@heroicons/react/24/solid";
+import {
+  HomeIcon,
+  TagIcon,
+  ArrowUpTrayIcon,
+  ClockIcon,
+} from "@heroicons/react/24/solid";
 import clsx from "clsx";
 import { usePathname } from "next/navigation";
+import { Session } from "next-auth";
+
 // ...
 
-export default function SideNav() {
+export default function SideNav({ session }: { session: Session | null }) {
   const links = [
     { name: "Home", href: "/", icon: HomeIcon },
-    { name: "Home", href: "/x", icon: HomeIcon },
-    { name: "Home", href: "/f", icon: HomeIcon },
+    { name: "分類1", href: "/video/play", icon: TagIcon },
+    { name: "分類2", href: "/video/test1", icon: TagIcon },
   ];
+
+  if (session?.access_token) {
+    links.push({
+      name: "觀看紀錄",
+      href: "/video/upload",
+      icon: ClockIcon,
+    });
+  }
 
   const pathname = usePathname();
 

@@ -1,13 +1,21 @@
+from uuid import UUID
 from fastapi import APIRouter, Request, HTTPException, Query, Path, Depends
 from fastapi.responses import FileResponse, StreamingResponse
 from typing import Annotated
 import logging
 
 from sqlmodel import Session
-from app.api.service.video_service import play_video_service, upload_video_service
+from app.api.service.video_service import (
+    play_video_service,
+    upload_video_service,
+    get_home_video_service,
+    get_video_service,
+)
 from app.api.deps import CurrentToken
 from app.api.request import PlayVideoRequest, UploadVideoForm
 from app.db_mysql.mysql_engine import get_session
+from app.api.response import GetHomeVideoResponse, GetVideoInfoResponse
+
 
 router = APIRouter()
 
@@ -32,3 +40,19 @@ def upload_video(
 ):
 
     return upload_video_service.upload_video(formdata, current_token, session)
+
+
+@router.get("/home/get-video")
+def upload_video(*, session: Session = Depends(get_session)) -> GetHomeVideoResponse:
+
+    return get_home_video_service.get_home_video(session)
+
+
+@router.get("/get-video/{video_id}")
+def upload_video(
+    *,
+    session: Session = Depends(get_session),
+    video_id: Annotated[UUID, Path()],
+) -> GetVideoInfoResponse:
+
+    return get_video_service.get_video_info(session, video_id)

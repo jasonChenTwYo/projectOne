@@ -7,8 +7,8 @@ from uuid import UUID
 
 
 class RegisterRequest(BaseModel):
-    user_name: str = Field(description="使用者名稱")
-    password_hash: str = Field(description="密碼")
+    user_name: Annotated[str, Field(description="使用者名稱")]
+    password_hash: str = Field(description="密碼", alias="password")
     email: EmailStr = Field(description="信箱，需唯一值")
 
 
@@ -22,10 +22,6 @@ class PlayVideoRequest:
 class UploadVideoForm:
     title: Annotated[
         str,
-        Form(),
-    ]
-    category_id: Annotated[
-        UUID,
         Form(),
     ]
     video_file: UploadFile
