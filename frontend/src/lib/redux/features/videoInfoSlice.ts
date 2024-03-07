@@ -8,6 +8,12 @@ export type VideoInfo = {
   user_name?: string;
   description?: string;
   thumbnail_path?: string;
+  categories?: Category[];
+};
+
+export type Category = {
+  category_name?: string;
+  category_id?: string;
 };
 
 const initialState: VideoInfo = {};

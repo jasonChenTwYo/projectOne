@@ -3,7 +3,7 @@ import { Suspense } from "react";
 
 export default async function Page() {
   return (
-    <main className="container mx-auto bg-white">
+    <main className="container mx-auto py-20">
       <h1 className="text-2xl font-bold text-center text-gray-800 mb-6">
         Upload a Video
       </h1>

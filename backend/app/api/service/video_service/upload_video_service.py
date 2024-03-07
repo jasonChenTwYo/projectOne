@@ -11,7 +11,7 @@ import os,logging
 
 def upload_video(formdata:UploadVideoForm,current_token: CurrentToken,session:Session):
 
-    categories=session.exec(select(CategoryTable).where(col(CategoryTable.category_id).in_(formdata.categories))).all()
+    categories=session.exec(select(CategoryTable).where(col(CategoryTable.category_id).in_([str(item) for item in formdata.categories.split(',')]))).all()
     
     if not os.path.exists(Path(settings.VIDEO_BASE_PATH) / current_token.user_id):
         os.makedirs(Path(settings.VIDEO_BASE_PATH) / current_token.user_id)

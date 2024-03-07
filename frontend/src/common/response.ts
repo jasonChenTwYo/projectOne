@@ -1,4 +1,4 @@
-import { VideoInfo } from "@/lib/redux/features/videoInfoSlice";
+import { Category, VideoInfo } from "@/lib/redux/features/videoInfoSlice";
 
 export type LogOutResponse = {
   message: string;
@@ -18,9 +18,4 @@ export type GetVideoInfoResponse = {
 
 export type CategoryForGetAllCategoryResponse = {
   categories: Category[];
-};
-
-export type Category = {
-  category_name: string;
-  category_id: string;
 };

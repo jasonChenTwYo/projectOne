@@ -14,26 +14,13 @@ export default function Page({
   const [videoInfo, setvideoInfo] = useState<VideoInfo>(
     useAppSelector((state) => state.videoInfo)
   );
-  const [videoUrl, setvideoUrl] = useState<string>(
-    `/api/play-video/${videoInfo.video_path}?group_id=${videoInfo.user_id}`
-  );
-  const [poster, setposter] = useState<string>(
-    `/api/img/${videoInfo.user_id}/${videoInfo.thumbnail_path}`
-  );
 
   useEffect(() => {
     const fetchAndSetVideoInfo = async () => {
       if (!videoInfo.video_id && searchParams.video_id) {
         try {
-          // 这里替换为你的 API 调用
           const response = await getVideoInfoApi(searchParams.video_id);
           setvideoInfo({ ...response.video_info });
-          setvideoUrl(
-            `/api/play-video/${response.video_info.video_path}?group_id=${response.video_info.user_id}`
-          );
-          setposter(
-            `/api/img/${response.video_info.user_id}/${response.video_info.thumbnail_path}`
-          );
         } catch (error) {
           console.error("Failed to fetch video info:", error);
         }
@@ -45,8 +32,29 @@ export default function Page({
 
   return (
     <main className="container mx-auto py-20">
-      <p>{videoInfo.title}</p>
-      <video src={videoUrl} controls width="80%" poster={poster}></video>
+      {!videoInfo.video_id && <div>Loading....</div>}
+      {videoInfo.video_id && (
+        <>
+          <p>{videoInfo.title}</p>
+          <video
+            src={`/api/play-video/${videoInfo.video_path}?group_id=${videoInfo.user_id}`}
+            controls
+            width="80%"
+            poster={`/api/img/${videoInfo.user_id}/${videoInfo.thumbnail_path}`}
+          ></video>
+          <div className="mt-5">
+            {videoInfo.categories?.map((tag) => (
+              <button
+                key={tag.category_id}
+                type="button"
+                className="inline-flex items-center px-4 py-2 bg-blue-100 rounded-full text-sm font-medium text-blue-700 mr-2 hover:bg-blue-200 focus:outline-none"
+              >
+                {tag.category_name}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
     </main>
   );
 }

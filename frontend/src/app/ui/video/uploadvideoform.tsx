@@ -1,7 +1,6 @@
 "use client";
 
-import { Category } from "@/common/response";
-import { uploadVideo } from "@/service/action";
+import { Category } from "@/lib/redux/features/videoInfoSlice";
 import { getAllCategoryApi, uploadVideoApi } from "@/service/api";
 import { useEffect, useRef, useState } from "react";
 import { useFormState } from "react-dom";
@@ -88,9 +87,9 @@ export default function UploadVideoForm() {
     const categories: string[] = [];
 
     selectedTags.forEach((tag) => {
-      categories.push(tag.category_id);
+      if (tag.category_id) categories.push(tag.category_id);
     });
-    formData.append("categories ", categories.join(","));
+    formData.append("categories", categories.join(","));
     // Mutate data
 
     try {
@@ -129,11 +128,12 @@ export default function UploadVideoForm() {
       </div>
 
       <div className="mt-2" ref={dropdownRef}>
+        <p className="mb-2">種類:</p>
         {selectedTags.map((tag) => (
           <button
             key={tag.category_id}
             type="button"
-            onClick={() => removeTag(tag.category_id)}
+            onClick={() => tag.category_id && removeTag(tag.category_id)}
             className="inline-flex items-center px-4 py-2 bg-blue-100 rounded-full text-sm font-medium text-blue-700 mr-2 hover:bg-blue-200 focus:outline-none"
           >
             {tag.category_name}
@@ -150,7 +150,7 @@ export default function UploadVideoForm() {
           + Add Tag
         </button>
         {showDropdown && (
-          <>
+          <ul className="mt-1 max-h-60 overflow-auto border border-gray-200 bg-white rounded-md shadow-lg">
             {categories.map((category) => {
               let name = category.category_name;
               const isSelected = selectedTags.some(
@@ -161,17 +161,18 @@ export default function UploadVideoForm() {
               }
 
               return (
-                <button
-                  key={category.category_id}
-                  type="button"
-                  className="px-4 py-2 w-full text-left h-full"
-                  onClick={() => addTag(category)}
-                >
-                  {name}
-                </button>
+                <li key={category.category_id}>
+                  <button
+                    type="button"
+                    className="px-4 py-2 w-full text-left h-full"
+                    onClick={() => addTag(category)}
+                  >
+                    {name}
+                  </button>
+                </li>
               );
             })}
-          </>
+          </ul>
         )}
       </div>
 

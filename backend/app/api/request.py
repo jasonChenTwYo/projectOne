@@ -27,7 +27,7 @@ class UploadVideoForm:
     video_file: UploadFile
     thumbnail_file: UploadFile
     categories: Annotated[
-        list[UUID],
+        str,
         Form(),
     ]
     description: Annotated[
