@@ -11,7 +11,7 @@ export default function UploadVideoForm() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedTags, setSelectedTags] = useState<Category[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
-  const dropdownRef = useRef(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const initialState = { message: "", erros: {} };
   const [state, formAction] = useFormState(uploadVideo, initialState);
 
@@ -45,7 +45,7 @@ export default function UploadVideoForm() {
         document.removeEventListener("mousedown", handleClickOutside);
       };
     }
-  }, [showDropdown]); // 依赖于 showDropdown 状态
+  }, [showDropdown]);
 
   const addTag = (category: Category) => {
     if (!selectedTags.find((tag) => tag.category_id === category.category_id)) {
@@ -130,19 +130,17 @@ export default function UploadVideoForm() {
 
       <div className="mt-2" ref={dropdownRef}>
         {selectedTags.map((tag) => (
-          <div
+          <button
             key={tag.category_id}
-            className="inline-flex items-center px-4 py-2 bg-blue-100 rounded-full text-sm font-medium text-blue-700 mr-2"
+            type="button"
+            onClick={() => removeTag(tag.category_id)}
+            className="inline-flex items-center px-4 py-2 bg-blue-100 rounded-full text-sm font-medium text-blue-700 mr-2 hover:bg-blue-200 focus:outline-none"
           >
             {tag.category_name}
-            <button
-              type="button"
-              onClick={() => removeTag(tag.category_id)}
-              className="ml-2 text-blue-700 hover:text-blue-900"
-            >
+            <span className="ml-2 text-blue-700 hover:text-blue-900">
               &times;
-            </button>
-          </div>
+            </span>
+          </button>
         ))}
         <button
           type="button"
