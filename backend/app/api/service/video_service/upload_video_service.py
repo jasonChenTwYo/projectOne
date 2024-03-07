@@ -6,14 +6,13 @@ from datetime import datetime
 from pathlib import Path
 from fastapi import UploadFile
 from app.db_mysql.mysql_models import VideoTable,CategoryTable
-from sqlmodel import Session
+from sqlmodel import Session, col,select
 import os,logging
 
 def upload_video(formdata:UploadVideoForm,current_token: CurrentToken,session:Session):
 
-    categoryOne = CategoryTable(category_name="巨乳")
-    categoryTwo = CategoryTable(category_name="Tifa")
-
+    categories=session.exec(select(CategoryTable).where(col(CategoryTable.category_id).in_(formdata.categories))).all()
+    
     if not os.path.exists(Path(settings.VIDEO_BASE_PATH) / current_token.user_id):
         os.makedirs(Path(settings.VIDEO_BASE_PATH) / current_token.user_id)
     if not os.path.exists(Path(settings.IMG_BASE_PATH) / current_token.user_id):
@@ -28,7 +27,7 @@ def upload_video(formdata:UploadVideoForm,current_token: CurrentToken,session:Se
                                            "video_path" : video_name,
                                            "thumbnail_path" : thumbnail_name,
                                            })
-    video_talbe.categories= [categoryOne,categoryTwo]
+    video_talbe.categories= categories
     logging.info(f"{video_talbe=}")
     session.add(video_talbe)
     write_video_and_thumbnail(current_token.user_id,video_name,thumbnail_name,

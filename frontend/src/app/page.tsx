@@ -14,13 +14,6 @@ export default function Page() {
     const fetchVideo = async () => {
       const response = await getHomeVideoApi();
       const list = response.video_list;
-      const defaultLength = 10;
-      if (list.length < defaultLength) {
-        const itemsToAdd = defaultLength - videoList.length;
-        for (let i = 0; i < itemsToAdd; i++) {
-          list.push({});
-        }
-      }
       setvideoList(list);
     };
 
@@ -34,15 +27,9 @@ export default function Page() {
         const groupPath = video.user_id ?? "default";
         const imagPath = `${groupPath}/${imagName}`;
         return (
-          // <video
-          //   width="100%"
-          //   key={video.video_id}
-          //   src={`/api/play-video/${video.video_path}?group_id=${video.user_id}`}
-          //   controls
-          // ></video>
           <Link
             className=" h-auto"
-            key={`video_${index}`}
+            key={`${video.video_id}`}
             href={`/video/play?video_id=${video.video_id}`}
             onClick={() => {
               dispatch(setInfo(video));

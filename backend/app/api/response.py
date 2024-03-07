@@ -35,3 +35,13 @@ class GetHomeVideoResponse(BaseModel):
 
 class GetVideoInfoResponse(BaseModel):
     video_info: VideoInfo
+
+
+class GetAllCategoryResponse(BaseModel):
+    categories: list["CategoryForGetAllCategoryResponse"]
+
+
+@dataclass
+class CategoryForGetAllCategoryResponse:
+    category_name: str
+    category_id: UUID

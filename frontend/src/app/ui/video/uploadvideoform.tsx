@@ -1,12 +1,113 @@
 "use client";
 
+import { Category } from "@/common/response";
 import { uploadVideo } from "@/service/action";
+import { getAllCategoryApi, uploadVideoApi } from "@/service/api";
+import { useEffect, useRef, useState } from "react";
 import { useFormState } from "react-dom";
+import { z } from "zod";
 
 export default function UploadVideoForm() {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [selectedTags, setSelectedTags] = useState<Category[]>([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef(null);
   const initialState = { message: "", erros: {} };
   const [state, formAction] = useFormState(uploadVideo, initialState);
 
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await getAllCategoryApi();
+        setCategories(response.categories);
+      } catch (error) {
+        console.error("Failed to fetch categories:", error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  useEffect(() => {
+    if (showDropdown) {
+      const handleClickOutside = (event: MouseEvent) => {
+        if (
+          dropdownRef.current &&
+          !dropdownRef.current.contains(event.target as Node)
+        ) {
+          setShowDropdown(false);
+        }
+      };
+
+      document.addEventListener("mousedown", handleClickOutside);
+
+      return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+      };
+    }
+  }, [showDropdown]); // 依赖于 showDropdown 状态
+
+  const addTag = (category: Category) => {
+    if (!selectedTags.find((tag) => tag.category_id === category.category_id)) {
+      setSelectedTags([...selectedTags, category]);
+    } else {
+      setSelectedTags(
+        selectedTags.filter((tag) => tag.category_id !== category.category_id)
+      );
+    }
+  };
+  const removeTag = (categoryId: string) => {
+    setSelectedTags(
+      selectedTags.filter((tag) => tag.category_id !== categoryId)
+    );
+  };
+
+  const uploadVideoSchema = z.object({
+    title: z.string({
+      invalid_type_error: "Invalid title",
+    }),
+  });
+
+  type State = {
+    errors?: {};
+    message?: string;
+  };
+
+  async function uploadVideo(prevState: State, formData: FormData) {
+    const validatedFields = uploadVideoSchema.safeParse({
+      title: formData.get("title"),
+    });
+
+    // Return early if the form data is invalid
+    if (!validatedFields.success) {
+      return {
+        errors: validatedFields.error.flatten().fieldErrors,
+      };
+    }
+
+    const categories: string[] = [];
+
+    selectedTags.forEach((tag) => {
+      categories.push(tag.category_id);
+    });
+    formData.append("categories ", categories.join(","));
+    // Mutate data
+
+    try {
+      const response = await uploadVideoApi(formData);
+      console.log(`response.status:${response.status}`);
+      if (response.status === 200) {
+        console.log("影片上傳成功");
+        return { message: "影片上傳成功" };
+      } else {
+        console.error("影片上傳失敗");
+        return { message: "影片上傳失敗" };
+      }
+    } catch (error) {
+      console.error("請求錯誤", error);
+      return { message: "請求錯誤" };
+    }
+  }
   return (
     <form className="flex flex-col p-4 space-y-4 bg-white shadow-md rounded-lg">
       <div className="text-lg font-semibold text-gray-700">
@@ -27,28 +128,53 @@ export default function UploadVideoForm() {
         />
       </div>
 
-      <div>
-        <label
-          htmlFor="category_id"
-          className="block text-sm font-medium text-gray-700"
+      <div className="mt-2" ref={dropdownRef}>
+        {selectedTags.map((tag) => (
+          <div
+            key={tag.category_id}
+            className="inline-flex items-center px-4 py-2 bg-blue-100 rounded-full text-sm font-medium text-blue-700 mr-2"
+          >
+            {tag.category_name}
+            <button
+              type="button"
+              onClick={() => removeTag(tag.category_id)}
+              className="ml-2 text-blue-700 hover:text-blue-900"
+            >
+              &times;
+            </button>
+          </div>
+        ))}
+        <button
+          type="button"
+          className="px-4 py-2 bg-gray-200 rounded-full text-sm font-medium text-gray-700"
+          onClick={() => setShowDropdown(!showDropdown)}
         >
-          種類:
-        </label>
-        {/* <select
-          name="category_id"
-          id="category_id"
-          className="mt-1 block w-full rounded-md border-2 border-gray-400 bg-gray-50 text-gray-700 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-500 focus:ring-opacity-50 sm:text-sm"
-        >
-          <option value="" disabled selected>
-            Select your option
-          </option> */}
-        {/* 假設 categories 是您的類別數組 */}
-        {/* {categories.map((category) => (
-            <option key={category.id} value={category.id}>
-              {category.name}
-            </option>
-          ))} */}
-        {/* </select> */}
+          + Add Tag
+        </button>
+        {showDropdown && (
+          <>
+            {categories.map((category) => {
+              let name = category.category_name;
+              const isSelected = selectedTags.some(
+                (tag) => tag.category_id === category.category_id
+              );
+              if (isSelected) {
+                name += " 已選擇";
+              }
+
+              return (
+                <button
+                  key={category.category_id}
+                  type="button"
+                  className="px-4 py-2 w-full text-left h-full"
+                  onClick={() => addTag(category)}
+                >
+                  {name}
+                </button>
+              );
+            })}
+          </>
+        )}
       </div>
 
       <div>

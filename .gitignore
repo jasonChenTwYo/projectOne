@@ -15,3 +15,4 @@ build/
 *~
 .scannerwork
 .history/
+mysql/sqls/initial.sql

@@ -1,34 +1,18 @@
+import {
+  CategoryForGetAllCategoryResponse,
+  GetHomeVideoResponse,
+  GetVideoInfoResponse,
+  LogOutResponse,
+  RegisterResponse,
+} from "@/common/response";
 import { auth } from "@/lib/config/auth.config";
-import { VideoInfo } from "@/lib/redux/features/videoInfoSlice";
-import axios, {
-  AxiosError,
-  AxiosInstance,
-  AxiosRequestConfig,
-  AxiosResponse,
-} from "axios";
-import { useSession, getSession } from "next-auth/react";
+import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
+import { getSession } from "next-auth/react";
 
-interface ApiInstance {
+export interface ApiInstance {
   customHeaders?: Record<string, string>;
   isAuth?: boolean;
 }
-
-interface LogOutResponse {
-  message: string;
-}
-
-interface RegisterResponse {
-  message: string;
-}
-
-interface GetHomeVideoResponse {
-  video_list: VideoInfo[];
-}
-
-interface GetVideoInfoResponse {
-  video_info: VideoInfo;
-}
-
 // 創建一個函數來生成 Axios 實例
 function createApiInstance(
   { customHeaders, isAuth }: ApiInstance = {
@@ -121,6 +105,17 @@ export const getVideoInfoApi = async (
       return { video_info: {} };
     });
 };
+
+export const getAllCategoryApi =
+  async (): Promise<CategoryForGetAllCategoryResponse> => {
+    const api = createApiInstance();
+    return api
+      .get<CategoryForGetAllCategoryResponse>(`/api/get-category/all`)
+      .then((res) => res.data)
+      .catch((error: AxiosError) => {
+        return { categories: [] };
+      });
+  };
 
 export const signOutApi = async (): Promise<LogOutResponse> => {
   const api = createApiInstance({ isAuth: true });

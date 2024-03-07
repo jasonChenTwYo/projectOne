@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-export interface VideoInfo {
+export type VideoInfo = {
   title?: string;
   video_id?: string;
   video_path?: string;
@@ -8,7 +8,7 @@ export interface VideoInfo {
   user_name?: string;
   description?: string;
   thumbnail_path?: string;
-}
+};
 
 const initialState: VideoInfo = {};
 

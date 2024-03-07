@@ -1,8 +1,7 @@
 "use client";
 import { VideoInfo } from "@/lib/redux/features/videoInfoSlice";
-import { useAppSelector, useAppDispatch } from "@/lib/redux/hook";
+import { useAppSelector } from "@/lib/redux/hook";
 import { getVideoInfoApi } from "@/service/api";
-// import React, { useEffect, useState } from "react";
 
 import { UUID } from "crypto";
 import { useEffect, useState } from "react";
