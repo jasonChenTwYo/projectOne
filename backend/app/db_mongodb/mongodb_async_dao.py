@@ -1,5 +1,7 @@
+from odmantic import ObjectId
+from pymongo import ReturnDocument
 from app.db_mongodb.mongodb_engine import async_engine
-from app.db_mongodb.mongodb_models import LoginToken
+from app.db_mongodb.mongodb_models import LoginToken, ReplyComment, VideoComment
 
 
 async def find_login_token_by_access_token(access_token: str) -> LoginToken:
@@ -13,3 +15,35 @@ async def delete_login_token(user_id: str):
     await async_engine.remove(
         LoginToken, LoginToken.user_id == str(user_id), just_one=True
     )
+
+
+async def save_video_comment(user_id: str, video_id: str, comment_message: str):
+    video_comment = VideoComment(
+        user_id=user_id, video_id=video_id, comment_message=comment_message, replies=[]
+    )
+    await async_engine.save(video_comment)
+
+
+async def find_video_comment(video_id: str):
+    comments = await async_engine.find(VideoComment, VideoComment.video_id == video_id)
+    return comments
+
+
+async def add_reply_to_video_comment(
+    video_comment_id: str, user_id: str, comment_message: str
+):
+    collection = async_engine.get_collection(VideoComment)
+
+    new_reply = {"user_id": user_id, "comment_message": comment_message}
+
+    # 使用 find_one_and_update 方法原子性地更新文档
+    updated_document = await collection.find_one_and_update(
+        {"_id": ObjectId(video_comment_id)},
+        {"$push": {"replies": new_reply}},
+        return_document=ReturnDocument.AFTER,
+    )
+
+    if updated_document:
+        return {"message": "success"}
+
+    return {"message": "fail"}

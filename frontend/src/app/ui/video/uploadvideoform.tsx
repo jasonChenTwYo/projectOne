@@ -2,6 +2,8 @@
 
 import { Category } from "@/lib/redux/features/videoInfoSlice";
 import { getAllCategoryApi, uploadVideoApi } from "@/service/api";
+import { signOut } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useFormState } from "react-dom";
 import { z } from "zod";
@@ -10,10 +12,11 @@ export default function UploadVideoForm() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedTags, setSelectedTags] = useState<Category[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const dropdownRef = useRef<HTMLUListElement>(null);
   const initialState = { message: "", erros: {} };
   const [state, formAction] = useFormState(uploadVideo, initialState);
-
+  const router = useRouter();
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -30,19 +33,12 @@ export default function UploadVideoForm() {
   useEffect(() => {
     if (showDropdown) {
       const handleClickOutside = (event: MouseEvent) => {
-        if (
-          dropdownRef.current &&
-          !dropdownRef.current.contains(event.target as Node)
-        ) {
+        if (!dropdownRef.current?.contains(event.target as Node)) {
           setShowDropdown(false);
         }
       };
 
       document.addEventListener("mousedown", handleClickOutside);
-
-      return () => {
-        document.removeEventListener("mousedown", handleClickOutside);
-      };
     }
   }, [showDropdown]);
 
@@ -60,6 +56,10 @@ export default function UploadVideoForm() {
       selectedTags.filter((tag) => tag.category_id !== categoryId)
     );
   };
+
+  const filteredCategories = categories.filter((category) =>
+    category.category_name?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const uploadVideoSchema = z.object({
     title: z.string({
@@ -94,14 +94,16 @@ export default function UploadVideoForm() {
 
     try {
       const response = await uploadVideoApi(formData);
-      console.log(`response.status:${response.status}`);
-      if (response.status === 200) {
+      console.log(`response.status:${response.message}`);
+      if (response.message === "success") {
         console.log("影片上傳成功");
         return { message: "影片上傳成功" };
-      } else {
-        console.error("影片上傳失敗");
-        return { message: "影片上傳失敗" };
+      } else if (response.message === "not found") {
+        const data = await signOut({ redirect: false, callbackUrl: "/login" });
+        router.push(data.url);
+        router.refresh();
       }
+      return { message: "影片上傳失敗" };
     } catch (error) {
       console.error("請求錯誤", error);
       return { message: "請求錯誤" };
@@ -127,7 +129,7 @@ export default function UploadVideoForm() {
         />
       </div>
 
-      <div className="mt-2" ref={dropdownRef}>
+      <div className="mt-2">
         <p className="mb-2">種類:</p>
         {selectedTags.map((tag) => (
           <button
@@ -150,8 +152,18 @@ export default function UploadVideoForm() {
           + Add Tag
         </button>
         {showDropdown && (
-          <ul className="mt-1 max-h-60 overflow-auto border border-gray-200 bg-white rounded-md shadow-lg">
-            {categories.map((category) => {
+          <ul
+            ref={dropdownRef}
+            className="mt-1 max-h-60 overflow-auto border border-gray-200 bg-white rounded-md shadow-lg"
+          >
+            <input
+              type="text"
+              className="w-full px-4 py-2"
+              placeholder="Search..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            {filteredCategories.map((category) => {
               let name = category.category_name;
               const isSelected = selectedTags.some(
                 (tag) => tag.category_id === category.category_id

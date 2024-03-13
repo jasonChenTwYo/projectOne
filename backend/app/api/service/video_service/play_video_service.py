@@ -43,14 +43,28 @@ def play_video(
         )
 
 
-def video_stream(video_path: Path, range_start: int, range_end: int):
+def video_stream(
+    video_path: Path, range_start: int, range_end: int, chunk_size=1024 * 1024
+):
+    """
+    Stream a video file from disk in chunks between range_start and range_end.
+
+    :param video_path: Path to the video file.
+    :param range_start: The starting byte from which to begin streaming the video.
+    :param range_end: The ending byte at which to stop streaming the video.
+    :param chunk_size: The size of each chunk to read and yield. Default is 1MB.
+    """
     with open(video_path, "rb") as video:
-        video.seek(range_start)  # 移動檔案指針到起始位置
-        while True:
-            bytes_read = video.read(range_end - range_start + 1)  # 讀取指定範圍的數據
-            if not bytes_read:
+        video.seek(range_start)
+        remaining_bytes = range_end - range_start + 1
+        while remaining_bytes > 0:
+            # Read the smaller of remaining bytes or chunk_size
+            bytes_to_read = min(remaining_bytes, chunk_size)
+            chunk = video.read(bytes_to_read)
+            if not chunk:
                 break
-            yield bytes_read
+            yield chunk
+            remaining_bytes -= len(chunk)
 
 
 def parse_range_header(range_header: str, file_size: int) -> tuple[int, int]:

@@ -22,7 +22,7 @@ export default function Page() {
 
   return (
     <main className="grid grid-cols-4 gap-5 container mx-auto py-20">
-      {videoList.map((video, index) => {
+      {videoList.map((video) => {
         const imagName = video.thumbnail_path ?? "Folder.jpg";
         const groupPath = video.user_id ?? "default";
         const imagPath = `${groupPath}/${imagName}`;

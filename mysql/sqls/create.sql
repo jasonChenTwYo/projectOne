@@ -1,6 +1,7 @@
 -- 用戶表
 create table user (
     user_id char(36) primary key comment '用戶ID，主鍵，UUID',
+    account VARCHAR(255) NOT NULL unique COMMENT '帳號，唯一，不允許為空',
     user_name varchar(255) not null comment '用戶名，不允許為空',
     email varchar(255) not null unique comment '電子郵箱，唯一，不允許為空',
     password_hash varchar(255) not null comment '密碼哈希值，不允許為空',

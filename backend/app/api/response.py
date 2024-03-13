@@ -2,13 +2,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional
 from uuid import UUID
-from pydantic import BaseModel, Field
-
-from app.db_mysql.mysql_models import CategoryTable
-
-
-class RegisterResponse(BaseModel):
-    message: str
+from pydantic import BaseModel
 
 
 @dataclass
@@ -29,15 +23,19 @@ class Category:
     category_name: str
 
 
-class GetHomeVideoResponse(BaseModel):
+class BaseResponse(BaseModel):
+    message: str
+
+
+class GetHomeVideoResponse(BaseResponse):
     video_list: list[VideoInfo]
 
 
-class GetVideoInfoResponse(BaseModel):
+class GetVideoInfoResponse(BaseResponse):
     video_info: VideoInfo
 
 
-class GetAllCategoryResponse(BaseModel):
+class GetAllCategoryResponse(BaseResponse):
     categories: list["CategoryForGetAllCategoryResponse"]
 
 

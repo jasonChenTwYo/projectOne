@@ -8,6 +8,10 @@ export type RegisterResponse = {
   message: string;
 };
 
+export type UploadVideoApiResponse = {
+  message: string;
+};
+
 export type GetHomeVideoResponse = {
   video_list: VideoInfo[];
 };

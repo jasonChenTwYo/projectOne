@@ -1,3 +1,4 @@
+import aiofiles
 from app.api.request import UploadVideoForm
 from app.api.deps import CurrentToken
 from app.config.config import settings
@@ -5,36 +6,28 @@ from uuid import uuid4
 from datetime import datetime
 from pathlib import Path
 from fastapi import UploadFile
-from app.db_mysql.mysql_models import VideoTable,CategoryTable
-from sqlmodel import Session, col,select
 import os,logging
 
-def upload_video(formdata:UploadVideoForm,current_token: CurrentToken,session:Session):
+async def upload_video(formdata:UploadVideoForm,current_token:CurrentToken):
 
-    categories=session.exec(select(CategoryTable).where(col(CategoryTable.category_id).in_([str(item) for item in formdata.categories.split(',')]))).all()
-    
-    if not os.path.exists(Path(settings.VIDEO_BASE_PATH) / current_token.user_id):
-        os.makedirs(Path(settings.VIDEO_BASE_PATH) / current_token.user_id)
-    if not os.path.exists(Path(settings.IMG_BASE_PATH) / current_token.user_id):
-        os.makedirs(Path(settings.IMG_BASE_PATH) / current_token.user_id)
+    if not os.path.exists(Path(settings.IMG_TEMP_BASE_PATH)):
+        os.makedirs(Path(settings.IMG_TEMP_BASE_PATH))
+    if not os.path.exists(Path(settings.VIDEO_TEMP_BASE_PATH)):
+        os.makedirs(Path(settings.VIDEO_TEMP_BASE_PATH))
 
     video_name = f"{str(uuid4())}_{datetime.now().strftime("%Y%m%d%H%M%S")}"
     thumbnail_name = f"{str(uuid4())}_{datetime.now().strftime("%Y%m%d%H%M%S")}.{get_file_extension(formdata.thumbnail_file)}"
-   
-    video_talbe=VideoTable.model_validate({"user_id":current_token.user_id,
-                                           "title": formdata.title,
-                                           "description" : formdata.description,
-                                           "video_path" : video_name,
-                                           "thumbnail_path" : thumbnail_name,
-                                           })
-    video_talbe.categories= categories
-    logging.info(f"{video_talbe=}")
-    session.add(video_talbe)
-    write_video_and_thumbnail(current_token.user_id,video_name,thumbnail_name,
-                                  formdata.video_file,formdata.thumbnail_file)
-    session.commit()
 
-    return {"message": "success", "video_name": video_name}
+    await write_video_and_thumbnail(video_name,thumbnail_name,formdata.video_file,formdata.thumbnail_file)
+
+    return {
+        "user_id":current_token.user_id,
+        "title": formdata.title,
+        "description" : formdata.description,
+        "video_path" : video_name,
+        "thumbnail_path" : thumbnail_name,
+        "categories": formdata.categories
+    }
 
 
 def get_file_extension(file: UploadFile) -> str:
@@ -45,24 +38,26 @@ def get_file_extension(file: UploadFile) -> str:
     
     return extension
 
-def write_video_and_thumbnail(user_id:str,video_name:str,thumbnail_name:str,video_file:UploadFile,thumbnail_file:UploadFile):
+async def write_video_and_thumbnail(video_name: str, thumbnail_name: str, video_file: UploadFile, thumbnail_file: UploadFile):
     video_name = f"{video_name}.mp4"
-    video_path = Path(settings.VIDEO_BASE_PATH) /user_id/video_name
-    thumbnail_name = f"{thumbnail_name}"
-    thumbnail_path =  Path(settings.IMG_BASE_PATH) /user_id/thumbnail_name
+    video_path = Path(settings.VIDEO_TEMP_BASE_PATH) / video_name
+    thumbnail_path = Path(settings.IMG_TEMP_BASE_PATH) / thumbnail_name
 
     try:
-        with open(
-            thumbnail_path,
-            "wb+",
-        ) as file_object:
-            file_object.write(thumbnail_file.file.read())
+        async with aiofiles.open(thumbnail_path, "wb") as file_object:
+            while True:
+                content = await thumbnail_file.read(1024 * 1024)  # 以 1MB 讀取
+                if not content:
+                    break
+                await file_object.write(content)
 
-        with open(
-            video_path,
-            "wb+",
-        ) as file_object:
-            file_object.write(video_file.file.read())
+        async with aiofiles.open(video_path, "wb") as file_object:
+            while True:
+                content = await video_file.read(1024 * 1024)  # 以 1MB 讀取
+                if not content:
+                    break
+                await file_object.write(content)
+
     except Exception as e:
         logging.exception("create error")
         if thumbnail_path.exists():

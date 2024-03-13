@@ -25,6 +25,17 @@ export default function Page() {
       <form className="flex flex-col items-center">
         <p className="text-pink-600">{errorMessage}</p>
         <label className="mb-3 mt-5 text-xs font-medium text-gray-900">
+          <span>Account</span>
+          <input
+            className="w-72 block mt-2 peer rounded-md border border-gray-200 py-[9px] pl-2 text-sm outline-2 placeholder:text-gray-500"
+            id="account"
+            type="text"
+            name="account"
+            placeholder="Enter your Account"
+            required
+          />
+        </label>
+        <label className="mb-3 mt-5 text-xs font-medium text-gray-900">
           <span>UserName</span>
           <input
             className="w-72 block mt-2 peer rounded-md border border-gray-200 py-[9px] pl-2 text-sm outline-2 placeholder:text-gray-500"

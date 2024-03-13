@@ -4,6 +4,7 @@ import {
   GetVideoInfoResponse,
   LogOutResponse,
   RegisterResponse,
+  UploadVideoApiResponse,
 } from "@/common/response";
 import { auth } from "@/lib/config/auth.config";
 import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
@@ -45,7 +46,7 @@ function createApiInstance(
       }
       return config;
     },
-    (error) => {
+    (error: Error) => {
       return Promise.reject(error);
     }
   );
@@ -60,7 +61,7 @@ function createApiInstance(
 }
 export const uploadVideoApi = async (
   formData: FormData
-): Promise<AxiosResponse> => {
+): Promise<UploadVideoApiResponse> => {
   const api = createApiInstance({
     customHeaders: {
       "Content-Type": "multipart/form-data",
@@ -68,8 +69,14 @@ export const uploadVideoApi = async (
     isAuth: true,
   });
   return api
-    .post<AxiosResponse>("/api/upload-video", formData)
-    .then((res: AxiosResponse) => res.data);
+    .post<UploadVideoApiResponse>("/api/upload-video", formData)
+    .then((res) => res.data)
+    .catch((error: AxiosError<{ detail?: string }>) => {
+      if (error.response?.data?.detail === "not found") {
+        return { message: "not found" };
+      }
+      return { message: "fail" };
+    });
 };
 
 export const registerApi = async (

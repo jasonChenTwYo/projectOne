@@ -23,4 +23,4 @@ def get_video_info(session: Session, vide_id: UUID):
 
     video_info.update({"categories": categories})
 
-    return {"video_info": video_info}
+    return {"video_info": video_info, "message": "success"}

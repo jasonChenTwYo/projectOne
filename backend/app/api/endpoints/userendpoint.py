@@ -4,7 +4,7 @@ from app.api.deps import CurrentToken
 from app.models import Token
 from app.db_mysql.mysql_models import UserTable
 from app.api.request import RegisterRequest
-from app.api.response import RegisterResponse
+from app.api.response import BaseResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from typing import Annotated
 import logging
@@ -21,12 +21,12 @@ from app.db_mysql.mysql_engine import get_session
 router = APIRouter()
 
 
-@router.post("/login/access-token")
+@router.post("/login/access-token", response_model=Token)
 def login_access_token(
     *,
     session: Session = Depends(get_session),
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
-) -> Token:
+):
     user = find_user_by_email(form_data.username, session)
 
     if not verify_password(form_data.password, user.password_hash):
@@ -43,13 +43,13 @@ def login_access_token(
     return mongodb_sync_dao.save_login_token(user.user_id, access_token, refresh_token)
 
 
-@router.post("/logout")
+@router.post("/logout", response_model=BaseResponse)
 async def logout(current_token: CurrentToken):
     await mongodb_async_dao.delete_login_token(current_token.user_id)
     return {"message": "logoutSuccess"}
 
 
-@router.post("/register", response_model=RegisterResponse)
+@router.post("/register", response_model=BaseResponse)
 def register(*, session: Session = Depends(get_session), request: RegisterRequest):
 
     request.password_hash = get_password_hash(request.password_hash)

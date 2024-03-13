@@ -13,7 +13,9 @@ class Settings(BaseSettings):
     MONGO_PASSWORD: str = "1234567"
 
     VIDEO_BASE_PATH: str = "static/video"
+    VIDEO_TEMP_BASE_PATH: str = "static/temp/video"
     IMG_BASE_PATH: str = "static/img"
+    IMG_TEMP_BASE_PATH: str = "static/temp/img"
 
 
 settings = Settings()

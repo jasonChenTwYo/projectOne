@@ -10,6 +10,7 @@ class UserTable(SQLModel, table=True):
     model_config = ConfigDict(from_attributes=True)
 
     user_id: UUID = Field(default_factory=lambda: uuid4(), primary_key=True)
+    account: str
     user_name: str  # = Field(sa_column=Column(name="user_name"))
     email: EmailStr = Field(sa_column=Column(String))
     password_hash: str

@@ -23,4 +23,4 @@ def get_home_video(session: Session):
         result_data.update({"categories": categories})
         video_list.append(result_data)
         logging.info(f"{result_data=}")
-    return {"video_list": video_list}
+    return {"video_list": video_list, "message": "success"}

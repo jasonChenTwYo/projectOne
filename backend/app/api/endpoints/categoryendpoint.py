@@ -9,14 +9,14 @@ from app.api.response import GetAllCategoryResponse
 router = APIRouter()
 
 
-@router.get("/get-category/all")
+@router.get("/get-category/all", response_model=GetAllCategoryResponse)
 def get_all_category(
     *,
     session: Session = Depends(get_session),
-) -> GetAllCategoryResponse:
+):
     result = session.exec(select(CategoryTable))
     categories = []
     for category in result:
         categories.append(category.model_dump())
 
-    return GetAllCategoryResponse(categories=categories)
+    return GetAllCategoryResponse(categories=categories, message="success")

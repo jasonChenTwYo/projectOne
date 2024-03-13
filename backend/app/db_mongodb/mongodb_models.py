@@ -1,5 +1,7 @@
-from odmantic import Model, Field
-from datetime import datetime, timedelta
+from typing import Optional
+from odmantic import EmbeddedModel, Model, Field
+from datetime import UTC, datetime, timedelta
+from uuid import UUID
 
 
 class LoginToken(Model):
@@ -7,7 +9,7 @@ class LoginToken(Model):
     user_id: str
     access_token: str
     access_token_expires_at: datetime = Field(
-        default_factory=lambda: datetime.now() + timedelta(minutes=15)
+        default_factory=lambda: datetime.now() + timedelta(days=1)
     )
     refresh_token: str
     refresh_token_expires_at: datetime = Field(
@@ -16,5 +18,18 @@ class LoginToken(Model):
     # 這是給mongodb TTL用的，因為它預設是UTC，但是台灣是UTC+8 如果用access_token_expires_at TTL 會失效
     # 但是如果 access_token_expires_at 改成UTC會不太直觀，在查看時不方便，所以就再多記這個
     expires_at: datetime = Field(
-        default_factory=lambda: datetime.utcnow() + timedelta(minutes=15)
+        default_factory=lambda: datetime.now(UTC) + timedelta(days=1)
     )
+
+
+class VideoComment(Model):
+    __collection__ = "video_comment"
+    video_id: str
+    user_id: str
+    comment_message: str
+    replies: list["ReplyComment"]
+
+
+class ReplyComment(EmbeddedModel):
+    user_id: str
+    comment_message: str

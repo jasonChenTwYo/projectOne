@@ -6,7 +6,25 @@ from dataclasses import dataclass
 from uuid import UUID
 
 
+class AddCommentRequest(BaseModel):
+    account: str = Field(description="帳號")
+    user_name: Annotated[str, Field(description="使用者名稱")]
+    password_hash: str = Field(description="密碼", alias="password")
+    email: EmailStr = Field(description="信箱，需唯一值")
+
+
+class AddVideoCommentRequest(BaseModel):
+    video_id: str
+    comment_message: str
+
+
+class AddRepliesRequest(BaseModel):
+    comment_id: str
+    comment_message: str
+
+
 class RegisterRequest(BaseModel):
+    account: str = Field(description="帳號")
     user_name: Annotated[str, Field(description="使用者名稱")]
     password_hash: str = Field(description="密碼", alias="password")
     email: EmailStr = Field(description="信箱，需唯一值")

@@ -34,6 +34,14 @@ services:
         condition: service_started
       mysql:
         condition: service_healthy
+  queue:
+    image: rabbitmq:3-management
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - backend
 
   # https://hub.docker.com/_/mongo
   mongodb:
