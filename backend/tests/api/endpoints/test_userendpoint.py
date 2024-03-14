@@ -1,3 +1,4 @@
+
 from pathlib import Path
 from uuid import uuid4
 from httpx import AsyncClient
@@ -6,6 +7,7 @@ from odmantic import AIOEngine, SyncEngine
 from pymongo import MongoClient
 import pytest
 from motor.motor_asyncio import AsyncIOMotorClient
+import pytest_asyncio
 from sqlalchemy import StaticPool, create_engine
 from sqlmodel import SQLModel, Session, select
 from app import main
@@ -49,8 +51,8 @@ def client_fixture(session: Session):
     main.app.dependency_overrides.clear()
 
 
-async def get_async_client():
-
+@pytest_asyncio.fixture(scope="session")
+async def test_async_client():
     async with AsyncClient(app=main.app, base_url="http://test") as ac:
         yield ac
 
@@ -107,11 +109,12 @@ def test_get_access_token(session: Session, client: TestClient) -> None:
 
     mongodb_sync_dao.sync_engine.get_collection(LoginToken).drop()
 
-
 @pytest.mark.asyncio(scope="session")
-async def test_logout():
-    async for client in get_async_client():
-        response = await client.post("/api/logout")
+async def test_logout(test_async_client:AsyncClient):
+     
+ 
+    response = await test_async_client.post("/api/logout")
+
 
     assert response.status_code == 401
 
@@ -121,17 +124,16 @@ async def test_logout():
 
     mongodb_sync_dao.save_login_token(user_id, access_token, refresh_token)
 
-    async for client in get_async_client():
-        response = await client.post(
-            "/api/logout", headers={"Authorization": f"Bearer {access_token}"}
-        )
+
+    response = await test_async_client.post("/api/logout", headers={"Authorization": f"Bearer {access_token}"})
+
 
     assert response.status_code == 200
     assert response.json() == {"message": "logoutSuccess"}
     assert not mongodb_sync_dao.find_login_token(user_id)
 
-    async for client in get_async_client():
-        response = await client.post(
+
+    response = await test_async_client.post(
             "/api/logout", headers={"Authorization": f"Bearer {access_token}"}
         )
     assert response.status_code == 404

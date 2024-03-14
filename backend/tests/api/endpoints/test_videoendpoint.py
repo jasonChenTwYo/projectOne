@@ -3,6 +3,7 @@ from uuid import uuid4
 from fastapi.testclient import TestClient
 from httpx import AsyncClient
 import pytest
+import pytest_asyncio
 from sqlalchemy import StaticPool, create_engine
 from sqlmodel import SQLModel, Session
 
@@ -38,7 +39,7 @@ def session_fixture():
 login_user_id = str(uuid4())
 
 
-@pytest.fixture(name="token")
+@pytest.fixture(name="token",scope="session")
 def token_fixture() -> LoginToken:
     return LoginToken(
         user_id=login_user_id, access_token=str(uuid4()), refresh_token=str(uuid4())
@@ -60,20 +61,19 @@ def client_fixture(session: Session, token: LoginToken):
     yield client
     main.app.dependency_overrides.clear()
 
-
-async def get_async_client(token: LoginToken):
-
+@pytest_asyncio.fixture(scope="session")
+async def test_async_client(token: LoginToken):
     def get_login_token_override():
         return token
 
     main.app.dependency_overrides[get_login_token] = get_login_token_override
     async with AsyncClient(app=main.app, base_url="http://test") as ac:
         yield ac
-    main.app.dependency_overrides.clear()
+    main.app.dependency_overrides.clear()    
 
-
-def test_add_comment(client: TestClient):
-    response = client.post(
+@pytest.mark.asyncio(scope="session")
+async def test_add_comment(test_async_client:AsyncClient):
+    response = await test_async_client.post(
         "api/add/comment",
         json={
             "video_id": f"{uuid4()}",
@@ -88,15 +88,15 @@ def test_add_comment(client: TestClient):
 
 
 @pytest.mark.asyncio(scope="session")
-async def test_add_replies(token: LoginToken):
+async def test_add_replies(test_async_client:AsyncClient):
 
     video_comment = VideoComment(
         user_id=str(uuid4()), video_id=str(uuid4()), comment_message="test", replies=[]
     )
     result = mongodb_sync_dao.sync_engine.save(video_comment)
 
-    async for ac in get_async_client(token):
-        response = await ac.post(
+  
+    response = await test_async_client.post(
             "api/add/replies",
             json={
                 "comment_id": f"{result.id}",
@@ -116,8 +116,8 @@ async def test_add_replies(token: LoginToken):
     assert data.replies[0].comment_message == "This is a test reply"
     assert data.replies[0].user_id == login_user_id
 
-    async for ac in get_async_client(token):
-        response = await ac.post(
+    response = await test_async_client.post(
+
             "api/add/replies",
             json={
                 "comment_id": f"{result.id}",
