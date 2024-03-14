@@ -1,4 +1,5 @@
 import asyncio
+import logging
 from uuid import uuid4
 from fastapi.testclient import TestClient
 from httpx import AsyncClient
@@ -24,7 +25,6 @@ sync_client = MongoClient(f"mongodb://root:pass@{settings.MONGODB_HOST}:27017/")
 async_client = AsyncIOMotorClient(f"mongodb://root:pass@{settings.MONGODB_HOST}:27017/")
 mongodb_sync_dao.sync_engine = SyncEngine(client=sync_client, database="example_db")
 mongodb_async_dao.async_engine = AIOEngine(client=async_client, database="example_db")
-
 
 @pytest.fixture(name="session")
 def session_fixture():
@@ -133,6 +133,7 @@ async def test_add_replies(test_async_client:AsyncClient):
         VideoComment, VideoComment.id == result.id
     )
 
+    logging.info("This is a test log message")
     assert len(data.replies) == 2
     assert data.replies[1].comment_message == "This is a testTwo reply"
     assert data.replies[1].user_id == login_user_id
