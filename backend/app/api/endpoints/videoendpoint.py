@@ -6,6 +6,7 @@ import logging
 
 from sqlmodel import Session
 from app.api.service.video_service import (
+    get_videos_by_tag_service,
     play_video_service,
     upload_video_service,
     get_home_video_service,
@@ -19,7 +20,12 @@ from app.api.request import (
     UploadVideoForm,
 )
 from app.db_mysql.mysql_engine import get_session
-from app.api.response import BaseResponse, GetHomeVideoResponse, GetVideoInfoResponse
+from app.api.response import (
+    BaseResponse,
+    GetHomeVideoResponse,
+    GetVideoInfoResponse,
+    GetVideoListByTagResponse,
+)
 from fastapi import BackgroundTasks
 
 from app.api.rabbitmq import publish_message_to_rabbitmq
@@ -52,13 +58,23 @@ async def upload_video(
 
 
 @router.get("/home/get-video", response_model=GetHomeVideoResponse)
-def upload_video(*, session: Session = Depends(get_session)):
+def get_home_video(*, session: Session = Depends(get_session)):
 
     return get_home_video_service.get_home_video(session)
 
 
+@router.get("/tag/{category_id}", response_model=GetVideoListByTagResponse)
+def get_video_by_tag(
+    *,
+    session: Session = Depends(get_session),
+    category_id: Annotated[UUID, Path()],
+):
+
+    return get_videos_by_tag_service.get_videos_by_tag(session, category_id)
+
+
 @router.get("/get-video/{video_id}", response_model=GetVideoInfoResponse)
-def upload_video(
+def get_video_by_id(
     *,
     session: Session = Depends(get_session),
     video_id: Annotated[UUID, Path()],

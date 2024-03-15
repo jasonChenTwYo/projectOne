@@ -21,6 +21,7 @@ class VideoInfo:
 @dataclass
 class Category:
     category_name: str
+    category_id: UUID
 
 
 class BaseResponse(BaseModel):
@@ -28,6 +29,10 @@ class BaseResponse(BaseModel):
 
 
 class GetHomeVideoResponse(BaseResponse):
+    video_list: list[VideoInfo]
+
+
+class GetVideoListByTagResponse(BaseResponse):
     video_list: list[VideoInfo]
 
 

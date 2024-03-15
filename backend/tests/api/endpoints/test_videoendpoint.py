@@ -10,6 +10,8 @@ from sqlmodel import SQLModel, Session
 
 from app import main
 from app.api.deps import get_login_token
+from app.api.service.video_service import get_videos_by_tag_service
+from app.api.utils import get_password_hash
 from app.db_mongodb.mongodb_models import LoginToken, VideoComment
 from app.db_mysql.mysql_engine import get_session
 
@@ -19,12 +21,39 @@ from app.db_mongodb import mongodb_sync_dao, mongodb_async_dao
 from odmantic import AIOEngine, SyncEngine
 from pymongo import MongoClient
 from motor.motor_asyncio import AsyncIOMotorClient
-from asyncio import get_event_loop
 
-sync_client = MongoClient(f"mongodb://root:pass@{settings.MONGODB_HOST}:27017/")
-async_client = AsyncIOMotorClient(f"mongodb://root:pass@{settings.MONGODB_HOST}:27017/")
-mongodb_sync_dao.sync_engine = SyncEngine(client=sync_client, database="example_db")
-mongodb_async_dao.async_engine = AIOEngine(client=async_client, database="example_db")
+from app.db_mysql.mysql_models import CategoryTable, UserTable, VideoTable
+
+login_user_id = str(uuid4())
+
+
+@pytest.fixture(autouse=True)
+def setup_and_teardown(session: Session):
+    # Setup
+    sync_client = MongoClient(f"mongodb://root:pass@{settings.MONGODB_HOST}:27017/")
+    async_client = AsyncIOMotorClient(
+        f"mongodb://root:pass@{settings.MONGODB_HOST}:27017/"
+    )
+    mongodb_sync_dao.sync_engine = SyncEngine(client=sync_client, database="example_db")
+    mongodb_async_dao.async_engine = AIOEngine(
+        client=async_client, database="example_db"
+    )
+
+    def get_session_override():
+        return session
+
+    def get_login_token_override():
+        return LoginToken(
+            user_id=login_user_id, access_token=str(uuid4()), refresh_token=str(uuid4())
+        )
+
+    main.app.dependency_overrides[get_session] = get_session_override
+    main.app.dependency_overrides[get_login_token] = get_login_token_override
+    yield
+    # Teardown
+    mongodb_sync_dao.sync_engine.get_collection(VideoComment).drop()
+    main.app.dependency_overrides.clear()
+
 
 @pytest.fixture(name="session")
 def session_fixture():
@@ -36,43 +65,21 @@ def session_fixture():
         yield session
 
 
-login_user_id = str(uuid4())
-
-
-@pytest.fixture(name="token",scope="session")
-def token_fixture() -> LoginToken:
-    return LoginToken(
-        user_id=login_user_id, access_token=str(uuid4()), refresh_token=str(uuid4())
-    )
-
-
 @pytest.fixture(name="client")
-def client_fixture(session: Session, token: LoginToken):
-    def get_session_override():
-        return session
-
-    def get_login_token_override():
-        return token
-
-    main.app.dependency_overrides[get_session] = get_session_override
-    main.app.dependency_overrides[get_login_token] = get_login_token_override
-
+def client_fixture():
     client = TestClient(main.app)
-    yield client
-    main.app.dependency_overrides.clear()
+    return client
+
 
 @pytest_asyncio.fixture(scope="session")
-async def test_async_client(token: LoginToken):
-    def get_login_token_override():
-        return token
+async def test_async_client():
 
-    main.app.dependency_overrides[get_login_token] = get_login_token_override
     async with AsyncClient(app=main.app, base_url="http://test") as ac:
         yield ac
-    main.app.dependency_overrides.clear()    
+
 
 @pytest.mark.asyncio(scope="session")
-async def test_add_comment(test_async_client:AsyncClient):
+async def test_add_comment(test_async_client: AsyncClient):
     response = await test_async_client.post(
         "api/add/comment",
         json={
@@ -84,25 +91,22 @@ async def test_add_comment(test_async_client:AsyncClient):
     assert "message" in response.json()
     assert response.json()["message"] == "success"
 
-    mongodb_sync_dao.sync_engine.get_collection(VideoComment).drop()
-
 
 @pytest.mark.asyncio(scope="session")
-async def test_add_replies(test_async_client:AsyncClient):
+async def test_add_replies(test_async_client: AsyncClient):
 
     video_comment = VideoComment(
         user_id=str(uuid4()), video_id=str(uuid4()), comment_message="test", replies=[]
     )
     result = mongodb_sync_dao.sync_engine.save(video_comment)
 
-  
     response = await test_async_client.post(
-            "api/add/replies",
-            json={
-                "comment_id": f"{result.id}",
-                "comment_message": "This is a test reply",
-            },
-        )
+        "api/add/replies",
+        json={
+            "comment_id": f"{result.id}",
+            "comment_message": "This is a test reply",
+        },
+    )
 
     assert response.status_code == 200
     assert "message" in response.json()
@@ -117,13 +121,12 @@ async def test_add_replies(test_async_client:AsyncClient):
     assert data.replies[0].user_id == login_user_id
 
     response = await test_async_client.post(
-
-            "api/add/replies",
-            json={
-                "comment_id": f"{result.id}",
-                "comment_message": "This is a testTwo reply",
-            },
-        )
+        "api/add/replies",
+        json={
+            "comment_id": f"{result.id}",
+            "comment_message": "This is a testTwo reply",
+        },
+    )
 
     assert response.status_code == 200
     assert "message" in response.json()
@@ -138,4 +141,34 @@ async def test_add_replies(test_async_client:AsyncClient):
     assert data.replies[1].comment_message == "This is a testTwo reply"
     assert data.replies[1].user_id == login_user_id
 
-    mongodb_sync_dao.sync_engine.get_collection(VideoComment).drop()
+
+def test_get_video_by_id(session: Session):
+    user = UserTable(
+        account="test_account",
+        user_name="test_user",
+        email="user@example.com",
+        password_hash=get_password_hash("1234567"),
+    )
+    session.add(user)
+    session.commit()
+    session.refresh(user)
+
+    video = VideoTable(
+        user_id=user.user_id,
+        title="test",
+        description="test",
+        video_path="test",
+        thumbnail_path="test",
+        categories=[CategoryTable(category_name="This is the first category")],
+    )
+    session.add(video)
+    session.commit()
+    session.refresh(video)
+
+    res = get_videos_by_tag_service.get_videos_by_tag(
+        session, video.categories[0].category_id
+    )
+    logging.info(f"{res=}")
+
+    res = get_videos_by_tag_service.get_videos_by_tag(session, uuid4())
+    logging.info(f"{res=}")

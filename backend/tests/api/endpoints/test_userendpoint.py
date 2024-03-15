@@ -1,4 +1,3 @@
-
 from pathlib import Path
 from uuid import uuid4
 from httpx import AsyncClient
@@ -20,13 +19,29 @@ from app.db_mysql.mysql_engine import get_session
 from app.db_mysql.mysql_models import UserTable
 from app.db_mongodb import mongodb_sync_dao, mongodb_async_dao
 
-settings.VIDEO_BASE_PATH = "tests/static/video"
-settings.IMG_BASE_PATH = "tests/static/img"
 
-sync_client = MongoClient(f"mongodb://root:pass@{settings.MONGODB_HOST}:27017/")
-async_client = AsyncIOMotorClient(f"mongodb://root:pass@{settings.MONGODB_HOST}:27017/")
-mongodb_sync_dao.sync_engine = SyncEngine(client=sync_client, database="example_db")
-mongodb_async_dao.async_engine = AIOEngine(client=async_client, database="example_db")
+@pytest.fixture(autouse=True)
+def setup_and_teardown(session: Session):
+    # Setup
+    settings.VIDEO_BASE_PATH = "tests/static/video"
+    settings.IMG_BASE_PATH = "tests/static/img"
+    sync_client = MongoClient(f"mongodb://root:pass@{settings.MONGODB_HOST}:27017/")
+    async_client = AsyncIOMotorClient(
+        f"mongodb://root:pass@{settings.MONGODB_HOST}:27017/"
+    )
+    mongodb_sync_dao.sync_engine = SyncEngine(client=sync_client, database="example_db")
+    mongodb_async_dao.async_engine = AIOEngine(
+        client=async_client, database="example_db"
+    )
+
+    def get_session_override():
+        return session
+
+    main.app.dependency_overrides[get_session] = get_session_override
+    yield
+    # Teardown
+    main.app.dependency_overrides.clear()
+    mongodb_sync_dao.sync_engine.get_collection(LoginToken).drop()
 
 
 @pytest.fixture(name="session")
@@ -40,15 +55,10 @@ def session_fixture():
 
 
 @pytest.fixture(name="client")
-def client_fixture(session: Session):
-    def get_session_override():
-        return session
-
-    main.app.dependency_overrides[get_session] = get_session_override
+def client_fixture():
 
     client = TestClient(main.app)
-    yield client
-    main.app.dependency_overrides.clear()
+    return client
 
 
 @pytest_asyncio.fixture(scope="session")
@@ -102,19 +112,15 @@ def test_get_access_token(session: Session, client: TestClient) -> None:
     tokens = r.json()
     assert r.status_code == 200
     assert "access_token" in tokens
-    assert tokens["access_token"]
     assert mongodb_sync_dao.sync_engine.find_one(
         LoginToken, LoginToken.access_token == tokens["access_token"]
     )
 
-    mongodb_sync_dao.sync_engine.get_collection(LoginToken).drop()
 
 @pytest.mark.asyncio(scope="session")
-async def test_logout(test_async_client:AsyncClient):
-     
- 
-    response = await test_async_client.post("/api/logout")
+async def test_logout(test_async_client: AsyncClient):
 
+    response = await test_async_client.post("/api/logout")
 
     assert response.status_code == 401
 
@@ -124,18 +130,15 @@ async def test_logout(test_async_client:AsyncClient):
 
     mongodb_sync_dao.save_login_token(user_id, access_token, refresh_token)
 
-
-    response = await test_async_client.post("/api/logout", headers={"Authorization": f"Bearer {access_token}"})
-
+    response = await test_async_client.post(
+        "/api/logout", headers={"Authorization": f"Bearer {access_token}"}
+    )
 
     assert response.status_code == 200
     assert response.json() == {"message": "logoutSuccess"}
     assert not mongodb_sync_dao.find_login_token(user_id)
 
-
     response = await test_async_client.post(
-            "/api/logout", headers={"Authorization": f"Bearer {access_token}"}
-        )
+        "/api/logout", headers={"Authorization": f"Bearer {access_token}"}
+    )
     assert response.status_code == 404
-
-    mongodb_sync_dao.sync_engine.get_collection(LoginToken).drop()
