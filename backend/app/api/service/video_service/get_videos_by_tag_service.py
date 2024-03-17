@@ -9,14 +9,14 @@ from app.db_mysql.mysql_models import (
 )
 
 
-def get_videos_by_tag(session: Session, category_id: UUID):
+def get_videos_by_tag(session: Session, category_name: str):
     video_list = []
     statement = (
         select(VideoTable, UserTable.user_name)
         .join(UserTable, isouter=True)
         .join(VideoCategoryAssociationTable, isouter=True)
         .join(CategoryTable, isouter=True)
-        .where(CategoryTable.category_id == category_id)
+        .where(CategoryTable.category_name == category_name)
         .options(selectinload(VideoTable.categories))
     )
     result = session.exec(statement)

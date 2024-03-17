@@ -40,7 +40,9 @@ def login_access_token(
         mongodb_sync_dao.delete_login_token(user.user_id)
     access_token = uuid4()
     refresh_token = uuid4()
-    return mongodb_sync_dao.save_login_token(user.user_id, access_token, refresh_token)
+    return mongodb_sync_dao.save_login_token(
+        user.account, user.user_id, access_token, refresh_token
+    )
 
 
 @router.post("/logout", response_model=BaseResponse)

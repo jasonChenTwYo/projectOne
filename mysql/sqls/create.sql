@@ -11,7 +11,7 @@ create table user (
 -- 影片分類表
 create table category (
     category_id char(36) primary key comment '分類ID，主鍵，UUID',
-    category_name varchar(255) not null comment '分類名稱，不允許為空'
+    category_name varchar(255) not null unique comment '分類名稱，不允許為空'
 ) comment='影片分類資訊表';
 
 -- 影片表

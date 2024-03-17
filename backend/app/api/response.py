@@ -21,7 +21,6 @@ class VideoInfo:
 @dataclass
 class Category:
     category_name: str
-    category_id: UUID
 
 
 class BaseResponse(BaseModel):

@@ -1,12 +1,13 @@
 from typing import Optional
 from odmantic import EmbeddedModel, Model, Field
 from datetime import UTC, datetime, timedelta
-from uuid import UUID
+from uuid import UUID, uuid4
 
 
 class LoginToken(Model):
     __collection__ = "login_token"
     user_id: str
+    account: str
     access_token: str
     access_token_expires_at: datetime = Field(
         default_factory=lambda: datetime.now() + timedelta(days=1)
@@ -25,11 +26,14 @@ class LoginToken(Model):
 class VideoComment(Model):
     __collection__ = "video_comment"
     video_id: str
-    user_id: str
+    account: str
     comment_message: str
+    comment_time: datetime = Field(default_factory=lambda: datetime.now())
     replies: list["ReplyComment"]
 
 
 class ReplyComment(EmbeddedModel):
-    user_id: str
+    id: str = Field(default_factory=lambda: str(uuid4()))
+    account: str
     comment_message: str
+    comment_time: datetime = Field(default_factory=lambda: datetime.now())

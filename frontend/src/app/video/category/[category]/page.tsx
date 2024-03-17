@@ -4,9 +4,9 @@ import { getTagVideoResponse } from "@/service/api";
 
 export default async function Page({
   params,
-}: {
+}: Readonly<{
   params: { category: string };
-}) {
+}>) {
   const response = await getTagVideoResponse(params.category);
   const videoList = response.video_list;
 

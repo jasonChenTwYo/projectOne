@@ -128,7 +128,9 @@ async def test_logout(test_async_client: AsyncClient):
     access_token = uuid4()
     refresh_token = uuid4()
 
-    mongodb_sync_dao.save_login_token(user_id, access_token, refresh_token)
+    mongodb_sync_dao.save_login_token(
+        "test_account", user_id, access_token, refresh_token
+    )
 
     response = await test_async_client.post(
         "/api/logout", headers={"Authorization": f"Bearer {access_token}"}

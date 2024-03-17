@@ -24,7 +24,12 @@ from motor.motor_asyncio import AsyncIOMotorClient
 
 from app.db_mysql.mysql_models import CategoryTable, UserTable, VideoTable
 
-login_user_id = str(uuid4())
+testToken = LoginToken(
+    account="test_account",
+    user_id=str(uuid4()),
+    access_token=str(uuid4()),
+    refresh_token=str(uuid4()),
+)
 
 
 @pytest.fixture(autouse=True)
@@ -43,9 +48,7 @@ def setup_and_teardown(session: Session):
         return session
 
     def get_login_token_override():
-        return LoginToken(
-            user_id=login_user_id, access_token=str(uuid4()), refresh_token=str(uuid4())
-        )
+        return testToken
 
     main.app.dependency_overrides[get_session] = get_session_override
     main.app.dependency_overrides[get_login_token] = get_login_token_override
@@ -96,7 +99,7 @@ async def test_add_comment(test_async_client: AsyncClient):
 async def test_add_replies(test_async_client: AsyncClient):
 
     video_comment = VideoComment(
-        user_id=str(uuid4()), video_id=str(uuid4()), comment_message="test", replies=[]
+        account="jason", video_id=str(uuid4()), comment_message="test", replies=[]
     )
     result = mongodb_sync_dao.sync_engine.save(video_comment)
 
@@ -118,7 +121,7 @@ async def test_add_replies(test_async_client: AsyncClient):
 
     assert len(data.replies) == 1
     assert data.replies[0].comment_message == "This is a test reply"
-    assert data.replies[0].user_id == login_user_id
+    assert data.replies[0].account == testToken.account
 
     response = await test_async_client.post(
         "api/add/replies",
@@ -139,7 +142,7 @@ async def test_add_replies(test_async_client: AsyncClient):
     logging.info("This is a test log message")
     assert len(data.replies) == 2
     assert data.replies[1].comment_message == "This is a testTwo reply"
-    assert data.replies[1].user_id == login_user_id
+    assert data.replies[1].account == testToken.account
 
 
 def test_get_video_by_id(session: Session):
@@ -166,9 +169,9 @@ def test_get_video_by_id(session: Session):
     session.refresh(video)
 
     res = get_videos_by_tag_service.get_videos_by_tag(
-        session, video.categories[0].category_id
+        session, video.categories[0].category_name
     )
     logging.info(f"{res=}")
 
-    res = get_videos_by_tag_service.get_videos_by_tag(session, uuid4())
+    res = get_videos_by_tag_service.get_videos_by_tag(session, "This is the")
     logging.info(f"{res=}")

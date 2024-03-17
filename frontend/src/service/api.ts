@@ -1,6 +1,10 @@
+import { AddVideoCommentRequest } from "@/common/request";
 import {
+  BaseResponse,
   CategoryForGetAllCategoryResponse,
+  GetCommentsResponse,
   GetHomeVideoResponse,
+  GetTagVideoResponse,
   GetVideoInfoResponse,
   LogOutResponse,
   RegisterResponse,
@@ -91,13 +95,53 @@ export const registerApi = async (
     });
 };
 
+export const addVideoCommentRequestApi = async (
+  addVideoCommentRequest: AddVideoCommentRequest
+): Promise<BaseResponse> => {
+  const api = createApiInstance({ isAuth: true });
+  return api
+    .post<BaseResponse>("/api/add/comment", addVideoCommentRequest)
+    .then((res) => res.data)
+    .catch(() => {
+      return { message: "fail" };
+    });
+};
+
 export const getHomeVideoApi = async (): Promise<GetHomeVideoResponse> => {
   const api = createApiInstance();
   return api
     .get<GetHomeVideoResponse>("/api/home/get-video")
     .then((res) => res.data)
-    .catch((error: AxiosError) => {
+    .catch(() => {
       return { video_list: [] };
+    });
+};
+
+export const getTagVideoResponse = async (
+  category_name: string
+): Promise<GetTagVideoResponse> => {
+  const api = createApiInstance();
+  return api
+    .get<GetTagVideoResponse>(
+      `${
+        process.env.PROXY_HOST ?? "http://127.0.0.1:8000"
+      }/api/tag/${category_name}`
+    )
+    .then((res) => res.data)
+    .catch(() => {
+      return { video_list: [] };
+    });
+};
+
+export const getVideoCommentsApi = async (
+  video_id: string
+): Promise<GetCommentsResponse> => {
+  const api = createApiInstance();
+  return api
+    .get<GetCommentsResponse>(`/api/get-video-comment/${video_id}`)
+    .then((res) => res.data)
+    .catch((error: AxiosError) => {
+      return { comments: [] };
     });
 };
 

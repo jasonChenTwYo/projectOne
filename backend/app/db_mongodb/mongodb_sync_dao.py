@@ -5,9 +5,10 @@ import logging
 
 
 def save_login_token(
-    user_id: UUID, access_token: UUID, refresh_token: UUID
+    account: str, user_id: UUID, access_token: UUID, refresh_token: UUID
 ) -> LoginToken:
     login_token = LoginToken(
+        account=account,
         user_id=str(user_id),
         access_token=str(access_token),
         refresh_token=str(refresh_token),

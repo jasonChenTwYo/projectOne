@@ -17,9 +17,9 @@ async def delete_login_token(user_id: str):
     )
 
 
-async def save_video_comment(user_id: str, video_id: str, comment_message: str):
+async def save_video_comment(account: str, video_id: str, comment_message: str):
     video_comment = VideoComment(
-        user_id=user_id, video_id=video_id, comment_message=comment_message, replies=[]
+        account=account, video_id=video_id, comment_message=comment_message, replies=[]
     )
     await async_engine.save(video_comment)
 
@@ -30,11 +30,13 @@ async def find_video_comment(video_id: str):
 
 
 async def add_reply_to_video_comment(
-    video_comment_id: str, user_id: str, comment_message: str
+    video_comment_id: str, account: str, comment_message: str
 ):
     collection = async_engine.get_collection(VideoComment)
 
-    new_reply = {"user_id": user_id, "comment_message": comment_message}
+    new_reply = ReplyComment(
+        account=account, comment_message=comment_message
+    ).model_dump()
 
     # 使用 find_one_and_update 方法原子性地更新文档
     updated_document = await collection.find_one_and_update(

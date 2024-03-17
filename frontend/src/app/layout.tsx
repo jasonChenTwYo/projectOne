@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import SideNav from "@/app/ui/common/SideNav";
-import TopBar from "@/app/ui/common/TopBar";
+import SideNav from "@/app/ui/common/sideNav";
+import TopBar from "@/app/ui/common/topBar";
 import clsx from "clsx";
 import { auth, signOut } from "@/lib/config/auth.config";
 import { ArrowRightStartOnRectangleIcon } from "@heroicons/react/20/solid";

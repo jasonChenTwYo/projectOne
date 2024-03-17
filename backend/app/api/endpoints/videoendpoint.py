@@ -30,7 +30,7 @@ from fastapi import BackgroundTasks
 
 from app.api.rabbitmq import publish_message_to_rabbitmq
 from app.db_mongodb import mongodb_async_dao
-from app.db_mongodb.mongodb_models import VideoComment
+
 
 router = APIRouter()
 
@@ -63,14 +63,14 @@ def get_home_video(*, session: Session = Depends(get_session)):
     return get_home_video_service.get_home_video(session)
 
 
-@router.get("/tag/{category_id}", response_model=GetVideoListByTagResponse)
+@router.get("/tag/{category_name}", response_model=GetVideoListByTagResponse)
 def get_video_by_tag(
     *,
     session: Session = Depends(get_session),
-    category_id: Annotated[UUID, Path()],
+    category_name: Annotated[str, Path()],
 ):
 
-    return get_videos_by_tag_service.get_videos_by_tag(session, category_id)
+    return get_videos_by_tag_service.get_videos_by_tag(session, category_name)
 
 
 @router.get("/get-video/{video_id}", response_model=GetVideoInfoResponse)
@@ -90,7 +90,7 @@ async def add_comment(
 ):
     await mongodb_async_dao.save_video_comment(
         video_id=request.video_id,
-        user_id=current_token.user_id,
+        account=current_token.account,
         comment_message=request.comment_message,
     )
     return {"message": "success"}
@@ -103,15 +103,15 @@ async def add_replies(
 ):
     result = await mongodb_async_dao.add_reply_to_video_comment(
         video_comment_id=request.comment_id,
-        user_id=current_token.user_id,
+        account=current_token.account,
         comment_message=request.comment_message,
     )
     return result
 
 
-@router.post("/get-video-comment/{video_id}", response_model=list[VideoComment])
+@router.get("/get-video-comment/{video_id}")
 async def get_video_comment(
     video_id: Annotated[UUID, Path()],
 ):
     comments = await mongodb_async_dao.find_video_comment(str(video_id))
-    return comments
+    return {"comments": comments}
