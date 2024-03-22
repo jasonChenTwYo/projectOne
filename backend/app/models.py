@@ -9,6 +9,7 @@ class User(BaseModel):
 
 
 class Token(BaseModel):
+    account: str
     access_token: UUID
     access_token_expires_at: datetime
     refresh_token: UUID

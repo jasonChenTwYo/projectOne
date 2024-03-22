@@ -3,7 +3,12 @@ export type AddVideoCommentRequest = {
   comment_message: string;
 };
 
-export type AddRepliesRequest = {
+export type AddReplyRequest = {
   comment_id: string;
   comment_message: string;
+};
+
+export type DeleteReplyRequest = {
+  video_comment_id: string;
+  reply_id: string;
 };

@@ -26,39 +26,39 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body className={clsx(inter.className, "flex flex-col h-screen")}>
-        <div className="flex justify-end items-center px-4 h-12 bg-blue-400 w-full">
-          <TopBar session={session} />
-          {session?.access_token && (
-            <form
-              action={async () => {
-                "use server";
-                const response = await signOutApi();
-                console.log(response.message);
-                if (response.message === "logoutSuccess") {
-                  await signOut({ redirectTo: "/" });
-                }
-              }}
-            >
-              <button
-                className={clsx(
-                  "flex h-[48px] w-full grow items-center justify-center gap-2 rounded-md font-medium md:flex-none md:justify-start md:p-2 md:px-3",
-                  " hover:bg-sky-500/50 hover:text-blue-600"
-                )}
+        <StoreProvider session={session}>
+          <div className="flex justify-end items-center px-4 h-12 bg-blue-400 w-full">
+            <TopBar />
+            {session?.access_token && (
+              <form
+                action={async () => {
+                  "use server";
+                  const response = await signOutApi();
+                  console.log(response.message);
+                  if (response.message === "logoutSuccess") {
+                    await signOut({ redirectTo: "/" });
+                  }
+                }}
               >
-                <div className="hidden md:block text-base">登出</div>
-                <ArrowRightStartOnRectangleIcon className="w-6" />
-              </button>
-            </form>
-          )}
-        </div>
-        <div className="flex flex-row h-full">
-          <div className="w-full flex-none md:w-64 bg-neutral-400">
-            <SideNav session={session} />
+                <button
+                  className={clsx(
+                    "flex h-[48px] w-full grow items-center justify-center gap-2 rounded-md font-medium md:flex-none md:justify-start md:p-2 md:px-3",
+                    " hover:bg-sky-500/50 hover:text-blue-600"
+                  )}
+                >
+                  <div className="hidden md:block text-base">登出</div>
+                  <ArrowRightStartOnRectangleIcon className="w-6" />
+                </button>
+              </form>
+            )}
           </div>
-          <div className="grow">
-            <StoreProvider>{children}</StoreProvider>
+          <div className="flex flex-row h-full">
+            <div className="w-full flex-none md:w-64 bg-neutral-400">
+              <SideNav />
+            </div>
+            <div className="grow">{children}</div>
           </div>
-        </div>
+        </StoreProvider>
       </body>
     </html>
   );

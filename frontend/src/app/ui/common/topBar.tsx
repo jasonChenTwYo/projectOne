@@ -6,13 +6,14 @@ import {
   UserPlusIcon,
 } from "@heroicons/react/24/solid";
 import clsx from "clsx";
-import { Session } from "next-auth";
 import { usePathname } from "next/navigation";
+import { useAppSelector } from "@/lib/redux/hook";
 
 // ...
-export default function TopBar({ session }: { session: Session | null }) {
+export default function TopBar() {
   const links = [];
-  if (!session?.access_token) {
+  const user = useAppSelector((state) => state.userInfo);
+  if (!user?.access_token) {
     links.push(
       {
         name: "登入",

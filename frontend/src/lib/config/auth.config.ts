@@ -6,9 +6,11 @@ import type { NextAuthConfig } from "next-auth";
 declare module "next-auth" {
   interface User {
     /** The user's postal address. */
+    account: string;
     access_token: string;
   }
   interface Session {
+    account: string;
     access_token: string;
   }
 }
@@ -74,6 +76,7 @@ const authConfig = {
         console.log("user: " + JSON.stringify(user));
         console.log("account: " + JSON.stringify(account));
         token.access_token = user.access_token;
+        token.account = user.account;
       }
       return token;
     },
@@ -82,11 +85,13 @@ const authConfig = {
       const parsedCredentials = z
         .object({
           access_token: z.string().uuid(),
+          account: z.string(),
         })
         .safeParse(token);
       if (parsedCredentials.success) {
-        const { access_token } = parsedCredentials.data;
+        const { access_token, account } = parsedCredentials.data;
         session.access_token = access_token;
+        session.account = account;
       }
       return session;
     },

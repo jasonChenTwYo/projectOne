@@ -50,13 +50,6 @@ class VideoTable(SQLModel, table=True):
     )
 
 
-# class Comment(SQLModel, table=True):
-#     id: UUID = Field(default_factory=lambda: uuid4(), primary_key=True)
-#     video_id: UUID = Field(foreign_key="video.id")
-#     user_id: UUID = Field(foreign_key="user.id")
-#     comment_text: str
-#     comment_time: Optional[str] = Field(default=None)
-
 # class WatchHistory(SQLModel, table=True):
 #     id: UUID = Field(default_factory=lambda: uuid4(), primary_key=True)
 #     user_id: UUID = Field(foreign_key="user.id")

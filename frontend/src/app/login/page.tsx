@@ -1,11 +1,14 @@
 "use client";
 import { useFormState } from "react-dom";
 import { AuthError } from "next-auth";
-import { signIn } from "next-auth/react";
+import { getSession, signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { useAppDispatch } from "@/lib/redux/hook";
+import { setUserInfo } from "@/lib/redux/features/userInfoSlice";
 export default function Page() {
   const router = useRouter();
   const [errorMessage, dispatch] = useFormState(authenticate, undefined);
+  const appDispatch = useAppDispatch();
 
   async function authenticate(
     prevState: string | undefined,
@@ -18,6 +21,13 @@ export default function Page() {
         password: formData.get("password"),
       });
       if (!res?.error) {
+        const session = await getSession();
+        appDispatch(
+          setUserInfo({
+            access_token: session?.access_token,
+            account: session?.account,
+          })
+        );
         router.push("/");
         router.refresh();
         return "success";

@@ -1,8 +1,9 @@
 import { configureStore } from "@reduxjs/toolkit";
 import videoInfoSlice from "./features/videoInfoSlice";
+import userInfoSlice from "./features/userInfoSlice";
 export const makeStore = () => {
   return configureStore({
-    reducer: { videoInfo: videoInfoSlice },
+    reducer: { videoInfo: videoInfoSlice, userInfo: userInfoSlice },
   });
 };
 

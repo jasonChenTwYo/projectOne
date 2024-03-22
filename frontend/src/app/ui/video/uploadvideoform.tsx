@@ -1,5 +1,6 @@
 "use client";
 
+import { setUserInfo } from "@/lib/redux/features/userInfoSlice";
 import { Category } from "@/lib/redux/features/videoInfoSlice";
 import { getAllCategoryApi, uploadVideoApi } from "@/service/api";
 import { signOut } from "next-auth/react";
@@ -100,6 +101,7 @@ export default function UploadVideoForm() {
         return { message: "影片上傳成功" };
       } else if (response.message === "not found") {
         const data = await signOut({ redirect: false, callbackUrl: "/login" });
+        appDispatch(setUserInfo({}));
         router.push(data.url);
         router.refresh();
       }
@@ -237,4 +239,7 @@ export default function UploadVideoForm() {
       </button>
     </form>
   );
+}
+function appDispatch(arg0: any, arg1: void) {
+  throw new Error("Function not implemented.");
 }

@@ -9,17 +9,20 @@ import {
 import clsx from "clsx";
 import { usePathname } from "next/navigation";
 import { Session } from "next-auth";
+import { useAppSelector } from "@/lib/redux/hook";
 
 // ...
 
-export default function SideNav({ session }: { session: Session | null }) {
+export default function SideNav() {
   const links = [
     { name: "Home", href: "/", icon: HomeIcon },
     { name: "分類1", href: "/video/play", icon: TagIcon },
     { name: "分類2", href: "/video/test1", icon: TagIcon },
   ];
 
-  if (session?.access_token) {
+  const user = useAppSelector((state) => state.userInfo);
+
+  if (user?.access_token) {
     links.push({
       name: "觀看紀錄",
       href: "/video/upload",

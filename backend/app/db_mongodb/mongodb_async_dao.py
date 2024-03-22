@@ -45,7 +45,33 @@ async def add_reply_to_video_comment(
         return_document=ReturnDocument.AFTER,
     )
 
-    if updated_document:
-        return {"message": "success"}
+    return updated_document
 
-    return {"message": "fail"}
+
+async def delete_reply_to_video_comment(
+    video_comment_id: str, reply_id: str, account: str
+):
+    collection = async_engine.get_collection(VideoComment)
+
+    updated_document = await collection.find_one_and_update(
+        {"_id": ObjectId(video_comment_id)},
+        {"$pull": {"replies": {"id": reply_id, "account": account}}},
+        return_document=ReturnDocument.AFTER,
+    )
+
+    return updated_document
+
+
+# async def delete_reply_to_video_comment(
+#     video_comment_id: str, reply_id: str, account: str
+# ):
+#     collection = async_engine.get_collection(VideoComment)
+
+#     updated_document = await collection.find_one_and_update(
+#         {"_id": ObjectId(video_comment_id)},
+#         {"$set": {"replies.$[elem].comment_message": "回覆已被刪除"}},
+#         array_filters=[{"elem.id": reply_id, "elem.account": account}],
+#         return_document=ReturnDocument.AFTER,
+#     )
+
+#     return updated_document

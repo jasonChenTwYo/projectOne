@@ -1,7 +1,12 @@
-import { AddVideoCommentRequest } from "@/common/request";
+import {
+  AddReplyRequest,
+  AddVideoCommentRequest,
+  DeleteReplyRequest,
+} from "@/common/request";
 import {
   BaseResponse,
   CategoryForGetAllCategoryResponse,
+  Comments,
   GetCommentsResponse,
   GetHomeVideoResponse,
   GetTagVideoResponse,
@@ -38,6 +43,7 @@ function createApiInstance(
       if (isAuth) {
         const isServer = typeof window === "undefined";
         const session = isServer ? await auth() : await getSession();
+
         if (!session?.access_token) {
           console.log("access_token not find");
           throw Error("access_token not find");
@@ -104,6 +110,30 @@ export const addVideoCommentRequestApi = async (
     .then((res) => res.data)
     .catch(() => {
       return { message: "fail" };
+    });
+};
+
+export const addReplyRequestApi = async (
+  addReplyRequest: AddReplyRequest
+): Promise<Comments> => {
+  const api = createApiInstance({ isAuth: true });
+  return api
+    .post<Comments>("/api/add/reply", addReplyRequest)
+    .then((res) => res.data)
+    .catch(() => {
+      throw new Error("fail");
+    });
+};
+
+export const deleteReplyRequestApi = async (
+  deleteReplyRequest: DeleteReplyRequest
+): Promise<Comments> => {
+  const api = createApiInstance({ isAuth: true });
+  return api
+    .post<Comments>("/api/delete/reply", deleteReplyRequest)
+    .then((res) => res.data)
+    .catch(() => {
+      throw new Error("fail");
     });
 };
 

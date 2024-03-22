@@ -18,7 +18,7 @@ export type Category = {
 
 const initialState: VideoInfo = {};
 
-const videoInSlice = createSlice({
+const videoInfoSlice = createSlice({
   name: "videoInfo",
   initialState: initialState,
   reducers: {
@@ -28,5 +28,5 @@ const videoInSlice = createSlice({
   },
 });
 
-export const { setInfo } = videoInSlice.actions;
-export default videoInSlice.reducer;
+export const { setInfo } = videoInfoSlice.actions;
+export default videoInfoSlice.reducer;

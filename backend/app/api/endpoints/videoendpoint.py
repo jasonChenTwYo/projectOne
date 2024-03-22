@@ -14,11 +14,13 @@ from app.api.service.video_service import (
 )
 from app.api.deps import CurrentToken
 from app.api.request import (
-    AddRepliesRequest,
+    AddReplyRequest,
+    DeleteReplyRequest,
     AddVideoCommentRequest,
     PlayVideoRequest,
     UploadVideoForm,
 )
+from app.db_mongodb.mongodb_models import VideoComment
 from app.db_mysql.mysql_engine import get_session
 from app.api.response import (
     BaseResponse,
@@ -96,16 +98,31 @@ async def add_comment(
     return {"message": "success"}
 
 
-@router.post("/add/replies", response_model=BaseResponse)
-async def add_replies(
+@router.post("/add/reply", response_model=VideoComment)
+async def add_reply(
     current_token: CurrentToken,
-    request: AddRepliesRequest,
+    request: AddReplyRequest,
 ):
     result = await mongodb_async_dao.add_reply_to_video_comment(
         video_comment_id=request.comment_id,
         account=current_token.account,
         comment_message=request.comment_message,
     )
+    logging.info(f"{result=}")
+    return result
+
+
+@router.post("/delete/reply", response_model=VideoComment)
+async def delete_reply(
+    current_token: CurrentToken,
+    request: DeleteReplyRequest,
+):
+    result = await mongodb_async_dao.delete_reply_to_video_comment(
+        video_comment_id=request.video_comment_id,
+        account=current_token.account,
+        reply_id=request.reply_id,
+    )
+    logging.info(f"{result=}")
     return result
 
 

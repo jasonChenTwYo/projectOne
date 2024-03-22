@@ -3,19 +3,19 @@
 import { Comments } from "@/common/response";
 import { addVideoCommentRequestApi, getVideoCommentsApi } from "@/service/api";
 import { UUID } from "crypto";
-import { Session } from "next-auth";
 import { useEffect, useState } from "react";
 import Comment from "@/app/ui/video/commet";
+import { useAppSelector } from "@/lib/redux/hook";
 export default function VideoComment({
   video_id,
-  session,
 }: Readonly<{
   video_id: UUID;
-  session: Session | null;
 }>) {
   const [comments, setComments] = useState<Comments[]>([]);
   const [newComment, setNewComment] = useState("");
   const [commentAdded, setCommentAdded] = useState(false);
+
+  const user = useAppSelector((state) => state.userInfo);
 
   useEffect(() => {
     const fetchComments = async () => {
@@ -39,7 +39,7 @@ export default function VideoComment({
       {comments.map((comment) => {
         return <Comment key={comment.id} {...comment} />;
       })}
-      {session && (
+      {user?.access_token && (
         <>
           <textarea
             value={newComment}
