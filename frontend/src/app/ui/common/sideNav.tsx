@@ -1,14 +1,8 @@
 "use client";
 import Link from "next/link";
-import {
-  HomeIcon,
-  TagIcon,
-  ArrowUpTrayIcon,
-  ClockIcon,
-} from "@heroicons/react/24/solid";
+import { HomeIcon, TagIcon, ClockIcon } from "@heroicons/react/24/solid";
 import clsx from "clsx";
 import { usePathname } from "next/navigation";
-import { Session } from "next-auth";
 import { useAppSelector } from "@/lib/redux/hook";
 
 // ...
@@ -16,8 +10,7 @@ import { useAppSelector } from "@/lib/redux/hook";
 export default function SideNav() {
   const links = [
     { name: "Home", href: "/", icon: HomeIcon },
-    { name: "分類1", href: "/video/play", icon: TagIcon },
-    { name: "分類2", href: "/video/test1", icon: TagIcon },
+    { name: "所有分類", href: "/video/category/all", icon: TagIcon },
   ];
 
   const user = useAppSelector((state) => state.userInfo);
@@ -25,7 +18,7 @@ export default function SideNav() {
   if (user?.access_token) {
     links.push({
       name: "觀看紀錄",
-      href: "/video/upload",
+      href: "/video/history",
       icon: ClockIcon,
     });
   }

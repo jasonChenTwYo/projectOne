@@ -3,16 +3,22 @@ import Link from "next/link";
 import {
   ArrowUpTrayIcon,
   ArrowLeftStartOnRectangleIcon,
+  ArrowRightStartOnRectangleIcon,
   UserPlusIcon,
 } from "@heroicons/react/24/solid";
 import clsx from "clsx";
-import { usePathname } from "next/navigation";
-import { useAppSelector } from "@/lib/redux/hook";
+import { usePathname, useRouter } from "next/navigation";
+import { useAppDispatch, useAppSelector } from "@/lib/redux/hook";
+import { signOut } from "next-auth/react";
+import { setUserInfo } from "@/lib/redux/features/userInfoSlice";
 
 // ...
 export default function TopBar() {
   const links = [];
   const user = useAppSelector((state) => state.userInfo);
+  const router = useRouter();
+  const appDispatch = useAppDispatch();
+
   if (!user?.access_token) {
     links.push(
       {
@@ -56,6 +62,28 @@ export default function TopBar() {
           </Link>
         );
       })}
+      {user?.access_token && (
+        <form
+          action={async () => {
+            const response = await signOut({
+              redirect: false,
+              callbackUrl: "/",
+            });
+            appDispatch(setUserInfo({}));
+            router.push(response.url);
+          }}
+        >
+          <button
+            className={clsx(
+              "flex h-[48px] w-full grow items-center justify-center gap-2 rounded-md font-medium md:flex-none md:justify-start md:p-2 md:px-3",
+              " hover:bg-sky-500/50 hover:text-blue-600"
+            )}
+          >
+            <div className="hidden md:block text-base">登出</div>
+            <ArrowRightStartOnRectangleIcon className="w-6" />
+          </button>
+        </form>
+      )}
     </>
   );
 }

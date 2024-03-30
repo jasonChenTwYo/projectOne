@@ -17,7 +17,7 @@ import {
 } from "@/common/response";
 import { auth } from "@/lib/config/auth.config";
 import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
-import { getSession } from "next-auth/react";
+import { getSession, signOut } from "next-auth/react";
 
 export interface ApiInstance {
   customHeaders?: Record<string, string>;
@@ -57,15 +57,24 @@ function createApiInstance(
       return config;
     },
     (error: Error) => {
+      console.log(error.message);
       return Promise.reject(error);
     }
   );
 
-  instance.interceptors.response.use((response: AxiosResponse) => {
-    console.log("response data:", response.data);
-    // 在這裡可以添加響應後的邏輯
-    return response;
-  });
+  instance.interceptors.response.use(
+    (response: AxiosResponse) => {
+      console.log("response data:", response.data);
+
+      return response;
+    },
+    async (error: AxiosError) => {
+      console.log(error.message);
+      console.log(error.response?.data);
+      await signOut({ callbackUrl: "/login" });
+      return Promise.reject(error);
+    }
+  );
 
   return instance;
 }
@@ -85,6 +94,18 @@ export const uploadVideoApi = async (
       if (error.response?.data?.detail === "not found") {
         return { message: "not found" };
       }
+      return { message: "fail" };
+    });
+};
+
+export const records_history = async (
+  video_id: string
+): Promise<BaseResponse> => {
+  const api = createApiInstance({ isAuth: true });
+  return api
+    .post<BaseResponse>(`/api/add-history/${video_id}`)
+    .then((res) => res.data)
+    .catch(() => {
       return { message: "fail" };
     });
 };
@@ -153,9 +174,7 @@ export const getTagVideoResponse = async (
   const api = createApiInstance();
   return api
     .get<GetTagVideoResponse>(
-      `${
-        process.env.PROXY_HOST ?? "http://127.0.0.1:8000"
-      }/api/tag/${category_name}`
+      `${process.env.PROXY_HOST ?? ""}/api/tag/${category_name}`
     )
     .then((res) => res.data)
     .catch(() => {
@@ -197,21 +216,6 @@ export const getAllCategoryApi =
         return { categories: [] };
       });
   };
-
-export const signOutApi = async (): Promise<LogOutResponse> => {
-  const api = createApiInstance({ isAuth: true });
-  return api
-    .post<LogOutResponse>(
-      `${process.env.PROXY_HOST ?? "http://127.0.0.1:8000"}/api/logout`
-    )
-    .then((res) => res.data)
-    .catch((error: AxiosError<{ detail?: string }>) => {
-      if (error.response?.data?.detail === "not found") {
-        return { message: "logoutSuccess" };
-      }
-      return { message: "fail" };
-    });
-};
 
 function formDataToJson(formData: FormData): string {
   const object = Object.fromEntries(formData.entries());

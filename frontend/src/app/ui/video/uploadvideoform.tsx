@@ -103,7 +103,6 @@ export default function UploadVideoForm() {
         const data = await signOut({ redirect: false, callbackUrl: "/login" });
         appDispatch(setUserInfo({}));
         router.push(data.url);
-        router.refresh();
       }
       return { message: "影片上傳失敗" };
     } catch (error) {

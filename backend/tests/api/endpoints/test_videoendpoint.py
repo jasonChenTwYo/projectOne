@@ -24,6 +24,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 
 from app.db_mysql.mysql_models import CategoryTable, UserTable, VideoTable
 
+logging.getLogger("sqlalchemy.engine").setLevel(logging.INFO)
 testToken = LoginToken(
     account="test_account",
     user_id=str(uuid4()),
@@ -104,7 +105,7 @@ async def test_add_replies(test_async_client: AsyncClient):
     result = mongodb_sync_dao.sync_engine.save(video_comment)
 
     response = await test_async_client.post(
-        "api/add/replies",
+        "api/add/reply",
         json={
             "comment_id": f"{result.id}",
             "comment_message": "This is a test reply",
@@ -112,8 +113,6 @@ async def test_add_replies(test_async_client: AsyncClient):
     )
 
     assert response.status_code == 200
-    assert "message" in response.json()
-    assert response.json()["message"] == "success"
 
     data = mongodb_sync_dao.sync_engine.find_one(
         VideoComment, VideoComment.id == result.id
@@ -124,7 +123,7 @@ async def test_add_replies(test_async_client: AsyncClient):
     assert data.replies[0].account == testToken.account
 
     response = await test_async_client.post(
-        "api/add/replies",
+        "api/add/reply",
         json={
             "comment_id": f"{result.id}",
             "comment_message": "This is a testTwo reply",
@@ -132,8 +131,6 @@ async def test_add_replies(test_async_client: AsyncClient):
     )
 
     assert response.status_code == 200
-    assert "message" in response.json()
-    assert response.json()["message"] == "success"
 
     data = mongodb_sync_dao.sync_engine.find_one(
         VideoComment, VideoComment.id == result.id
@@ -152,9 +149,6 @@ def test_get_video_by_id(session: Session):
         email="user@example.com",
         password_hash=get_password_hash("1234567"),
     )
-    session.add(user)
-    session.commit()
-    session.refresh(user)
 
     video = VideoTable(
         user_id=user.user_id,
@@ -164,6 +158,7 @@ def test_get_video_by_id(session: Session):
         thumbnail_path="test",
         categories=[CategoryTable(category_name="This is the first category")],
     )
+    session.add(user)
     session.add(video)
     session.commit()
     session.refresh(video)

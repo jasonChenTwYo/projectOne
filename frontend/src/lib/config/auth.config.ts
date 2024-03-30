@@ -16,8 +16,8 @@ declare module "next-auth" {
 }
 
 const authConfig = {
-  trustHost: true,
-  session: { strategy: "jwt" },
+  secret: process.env.AUTH_SECRET ?? "189e883f3dd8a0bea87a1a419344220d",
+  session: { strategy: "jwt", maxAge: 86400 },
   pages: {
     signIn: "/login",
   },

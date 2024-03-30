@@ -29,7 +29,6 @@ export default function Page() {
           })
         );
         router.push("/");
-        router.refresh();
         return "success";
       } else {
         return "error";

@@ -13,26 +13,20 @@ export default function VideoComment({
 }>) {
   const [comments, setComments] = useState<Comments[]>([]);
   const [newComment, setNewComment] = useState("");
-  const [commentAdded, setCommentAdded] = useState(false);
 
   const user = useAppSelector((state) => state.userInfo);
 
+  const fetchComments = async () => {
+    try {
+      const response = await getVideoCommentsApi(video_id);
+      setComments(response.comments);
+    } catch (error) {
+      console.error("Failed to fetch comments:", error);
+    }
+  };
   useEffect(() => {
-    const fetchComments = async () => {
-      try {
-        const response = await getVideoCommentsApi(video_id);
-        setComments(response.comments);
-      } catch (error) {
-        console.error("Failed to fetch comments:", error);
-      }
-    };
     fetchComments();
-    console.log("fetchComments");
-    return () => {
-      console.log("setCommentAdded");
-      setCommentAdded(false);
-    };
-  }, [commentAdded]);
+  }, []);
 
   return (
     <>
@@ -59,7 +53,7 @@ export default function VideoComment({
               });
               if (result.message == "success") {
                 setNewComment("");
-                setCommentAdded(true);
+                await fetchComments();
               }
             }}
             className="mt-2 inline-flex items-center px-4 py-2 bg-indigo-500 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-600 active:bg-indigo-700 focus:outline-none focus:border-indigo-700 focus:ring focus:ring-indigo-200 disabled:opacity-25 transition"

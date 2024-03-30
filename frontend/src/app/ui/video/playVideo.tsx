@@ -2,7 +2,7 @@
 
 import { VideoInfo, setInfo } from "@/lib/redux/features/videoInfoSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/redux/hook";
-import { getVideoInfoApi } from "@/service/api";
+import { getVideoInfoApi, records_history } from "@/service/api";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { UUID } from "crypto";
@@ -12,6 +12,7 @@ export default function PlayVideo({ video_id }: { video_id: UUID }) {
   const [videoInfo, setvideoInfo] = useState<VideoInfo>(
     useAppSelector((state) => state.videoInfo)
   );
+  const user = useAppSelector((state) => state.userInfo);
 
   useEffect(() => {
     const fetchAndSetVideoInfo = async () => {
@@ -24,7 +25,18 @@ export default function PlayVideo({ video_id }: { video_id: UUID }) {
         }
       }
     };
+
     fetchAndSetVideoInfo();
+
+    if (user.account) {
+      records_history(video_id)
+        .then(() => {
+          console.log("View history recorded");
+        })
+        .catch((error) => {
+          console.error("Failed to record view history:", error);
+        });
+    }
   }, []);
 
   return (

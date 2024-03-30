@@ -50,8 +50,11 @@ class VideoTable(SQLModel, table=True):
     )
 
 
-# class WatchHistory(SQLModel, table=True):
-#     id: UUID = Field(default_factory=lambda: uuid4(), primary_key=True)
-#     user_id: UUID = Field(foreign_key="user.id")
-#     video_id: UUID = Field(foreign_key="video.id")
-#     watch_time: Optional[str] = Field(default=None)
+class WatchHistoryTable(SQLModel, table=True):
+    __tablename__ = "watch_history"
+    model_config = ConfigDict(from_attributes=True)
+
+    watch_id: UUID = Field(default_factory=lambda: uuid4(), primary_key=True)
+    user_id: UUID = Field(foreign_key="user.user_id")
+    video_id: UUID = Field(foreign_key="video.video_id")
+    watch_time: datetime = Field(default_factory=lambda: datetime.today())

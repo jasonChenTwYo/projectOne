@@ -23,7 +23,12 @@ const nextConfig = {
         },
       ];
     }
-    return [];
+    return [
+      {
+        source: "/api/img/:path*",
+        destination: `${process.env.PROXY_HOST}/api/img/:path*`,
+      },
+    ];
   },
 };
 

@@ -34,23 +34,12 @@ CREATE TABLE video_category_association (
     FOREIGN KEY (category_id) REFERENCES category(category_id)
 ) COMMENT='影片和分類之間的多對多關聯表';
 
--- -- 評論表
--- create table comments (
---     comment_id char(36) primary key comment '評論ID，主鍵，UUID',
---     video_id char(36) comment '影片ID，外鍵，引用影片表的video_id',
---     user_id char(36) comment '用戶ID，外鍵，引用用戶表的user_id',
---     comment_text text not null comment '評論內容，不允許為空',
---     comment_time timestamp default current_timestamp comment '評論時間，默認為當前時間戳',
---     foreign key (video_id) references videos(video_id),
---     foreign key (user_id) references users(user_id)
--- ) comment='用戶評論資訊表';
-
 -- 用戶觀看歷史表
 create table watch_history (
     watch_id char(36) primary key comment '觀看記錄ID，主鍵，UUID',
     user_id char(36) comment '用戶ID，外鍵，引用用戶表的user_id',
     video_id char(36) comment '影片ID，外鍵，引用影片表的video_id',
-    watch_time timestamp default current_timestamp comment '觀看時間，默認為當前時間戳',
+    watch_time timestamp '觀看時間，默認為當前時間戳',
     foreign key (user_id) references user(user_id),
     foreign key (video_id) references video(video_id)
 ) comment='用戶觀看歷史資訊表';
