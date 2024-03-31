@@ -1,0 +1,12 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.projectone.messagelistener.DbMapper">
+    <insert id="insertVideo">
+        INSERT INTO video(video_id, user_id, title, description, upload_time, video_path, thumbnail_path)
+        VALUES(#{video.videoId}, #{video.userId}, #{video.title}, #{video.description}, #{video.uploadTime}, #{video.videoPath}, #{video.thumbnailPath})
+    </insert>
+
+    <insert id="insertVideoCategoryAssociation">
+        INSERT INTO video_category_association(video_id, category_id)
+        VALUES(#{videoId}, #{categoryId});
+    </insert>
+</mapper>

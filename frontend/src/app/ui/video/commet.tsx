@@ -1,7 +1,7 @@
 "use client";
 import { format } from "date-fns";
 import { UserIcon } from "@heroicons/react/24/solid";
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 import { Reply } from "@/common/response";
 import { addReplyRequestApi, deleteReplyRequestApi } from "@/service/api";
 import { useAppSelector } from "@/lib/redux/hook";
@@ -11,6 +11,7 @@ export default function Comment({
   comment_message,
   comment_time,
   replies: initialReplies,
+  deleteComment,
 }: Readonly<{
   id: string;
   account: string;
@@ -22,6 +23,7 @@ export default function Comment({
     comment_message: string;
     comment_time: Date;
   }[];
+  deleteComment: (e: FormEvent<HTMLFormElement>) => void;
 }>) {
   const [replies, setReplies] = useState<Reply[]>(initialReplies ?? []);
   const [replyMessage, setReplyMessage] = useState("");
@@ -43,32 +45,44 @@ export default function Comment({
         </div>
       </div>
       {user?.account && (
-        <form
-          onSubmit={async (e) => {
-            e.preventDefault();
-            const response = await addReplyRequestApi({
-              comment_id: id,
-              comment_message: replyMessage,
-            });
-            setReplyMessage("");
-            setReplies(response.replies ?? replies);
-          }}
-          className="pl-10 mt-2"
-        >
-          <input
-            type="text"
-            className="border rounded-lg p-2 text-sm w-full"
-            placeholder="你的回覆..."
-            value={replyMessage}
-            onChange={(e) => setReplyMessage(e.target.value)}
-          />
-          <button
-            type="submit"
-            className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-lg"
+        <>
+          <form
+            onSubmit={async (e) => {
+              e.preventDefault();
+              const response = await addReplyRequestApi({
+                comment_id: id,
+                comment_message: replyMessage,
+              });
+              setReplyMessage("");
+              setReplies(response.replies ?? replies);
+            }}
+            className="pl-10 mt-2"
           >
-            回复
-          </button>
-        </form>
+            <input
+              type="text"
+              className="border rounded-lg p-2 text-sm w-full"
+              placeholder="你的回覆..."
+              value={replyMessage}
+              onChange={(e) => setReplyMessage(e.target.value)}
+            />
+            <button
+              type="submit"
+              className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-lg"
+            >
+              回复
+            </button>
+          </form>
+          {user?.account && user?.account === account && (
+            <form onSubmit={deleteComment} className="pl-10 mt-2">
+              <button
+                type="submit"
+                className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-lg"
+              >
+                刪除評論
+              </button>
+            </form>
+          )}
+        </>
       )}
       {replies && replies.length > 0 && (
         <div className="mt-2 space-y-2 pl-10">
@@ -86,7 +100,7 @@ export default function Comment({
                   <p className="text-xs text-gray-500">
                     {format(reply.comment_time, "yyyy-MM-dd HH:mm:ss")}
                   </p>
-                  {user?.account === reply.account && (
+                  {user?.account && user?.account === reply.account && (
                     <button
                       type="button"
                       className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-lg"

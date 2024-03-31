@@ -17,6 +17,7 @@ from app.api.request import (
     AddReplyRequest,
     DeleteReplyRequest,
     AddVideoCommentRequest,
+    DeleteVideoCommentRequest,
     PlayVideoRequest,
     UploadVideoForm,
 )
@@ -95,6 +96,19 @@ async def add_comment(
         account=current_token.account,
         comment_message=request.comment_message,
     )
+    return {"message": "success"}
+
+
+@router.post("/delete/comment", response_model=BaseResponse)
+async def add_comment(
+    current_token: CurrentToken,
+    request: DeleteVideoCommentRequest,
+):
+    number = await mongodb_async_dao.delete_video_comment(
+        video_comment_id=request.video_comment_id,
+        account=current_token.account,
+    )
+    logging.info(f"delete {number=}")
     return {"message": "success"}
 
 

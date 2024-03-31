@@ -16,12 +16,14 @@ export default function StoreProvider({
   if (!storeRef.current) {
     // Create the store instance the first time this renders
     storeRef.current = makeStore();
-    storeRef.current.dispatch(
-      setUserInfo({
-        access_token: session?.access_token,
-        account: session?.account,
-      })
-    );
+    if (session?.access_token) {
+      storeRef.current.dispatch(
+        setUserInfo({
+          access_token: session?.access_token,
+          account: session?.account,
+        })
+      );
+    }
   }
 
   return <Provider store={storeRef.current}>{children}</Provider>;

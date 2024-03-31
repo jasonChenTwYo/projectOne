@@ -24,8 +24,20 @@ async def save_video_comment(account: str, video_id: str, comment_message: str):
     await async_engine.save(video_comment)
 
 
-async def find_video_comment(video_id: str):
-    comments = await async_engine.find(VideoComment, VideoComment.video_id == video_id)
+async def delete_video_comment(video_comment_id: str, account: str):
+    number = await async_engine.remove(
+        VideoComment,
+        (VideoComment.id == ObjectId(video_comment_id))
+        & (VideoComment.account == account),
+        just_one=True,
+    )
+    return number
+
+
+async def find_video_comment(video_id: str, limit: int = 10, skip: int = 0):
+    comments = await async_engine.find(
+        VideoComment, VideoComment.video_id == video_id, limit=limit, skip=skip
+    )
     return comments
 
 

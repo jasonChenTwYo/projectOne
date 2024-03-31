@@ -2,6 +2,7 @@ import {
   AddReplyRequest,
   AddVideoCommentRequest,
   DeleteReplyRequest,
+  DeleteVideoCommentRequest,
 } from "@/common/request";
 import {
   BaseResponse,
@@ -131,6 +132,18 @@ export const addVideoCommentRequestApi = async (
     .then((res) => res.data)
     .catch(() => {
       return { message: "fail" };
+    });
+};
+
+export const deleteVideoCommentRequestApi = async (
+  deleteVideoCommentRequest: DeleteVideoCommentRequest
+): Promise<BaseResponse> => {
+  const api = createApiInstance({ isAuth: true });
+  return api
+    .post<BaseResponse>("/api/delete/comment", deleteVideoCommentRequest)
+    .then((res) => res.data)
+    .catch(() => {
+      throw new Error("fail");
     });
 };
 

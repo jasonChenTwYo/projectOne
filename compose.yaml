@@ -44,6 +44,13 @@ services:
     networks:
       - backend
 
+  messagelistener:
+    restart: always
+    build:
+      context: messagelistener
+    networks:
+      - backend
+
   # https://hub.docker.com/_/mongo
   mongodb:
     image: mongo

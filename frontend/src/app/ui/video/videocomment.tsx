@@ -1,7 +1,11 @@
 "use client";
 
 import { Comments } from "@/common/response";
-import { addVideoCommentRequestApi, getVideoCommentsApi } from "@/service/api";
+import {
+  addVideoCommentRequestApi,
+  deleteVideoCommentRequestApi,
+  getVideoCommentsApi,
+} from "@/service/api";
 import { UUID } from "crypto";
 import { useEffect, useState } from "react";
 import Comment from "@/app/ui/video/commet";
@@ -31,7 +35,19 @@ export default function VideoComment({
   return (
     <>
       {comments.map((comment) => {
-        return <Comment key={comment.id} {...comment} />;
+        return (
+          <Comment
+            key={comment.id}
+            {...comment}
+            deleteComment={async (e) => {
+              e.preventDefault();
+              await deleteVideoCommentRequestApi({
+                video_comment_id: comment.id,
+              });
+              await fetchComments();
+            }}
+          />
+        );
       })}
       {user?.access_token && (
         <>

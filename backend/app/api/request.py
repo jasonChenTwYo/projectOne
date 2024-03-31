@@ -18,6 +18,10 @@ class AddVideoCommentRequest(BaseModel):
     comment_message: str
 
 
+class DeleteVideoCommentRequest(BaseModel):
+    video_comment_id: str
+
+
 class AddReplyRequest(BaseModel):
     comment_id: str
     comment_message: str
