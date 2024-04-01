@@ -2,6 +2,7 @@ from fastapi import FastAPI, Request, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from app import rabbitmq
 from app.api.router import api_router
 import logging
 import traceback
@@ -13,16 +14,18 @@ logging.basicConfig(
     level=logging.INFO,
 )
 
-app = FastAPI()
+app = FastAPI(
+    servers=[
+        {"url": "/", "description": "local environment"},
+        {"url": "/api", "description": "dev environment"},
+    ]
+)
 
 # app.include_router(api_router,prefix="/")
-app.include_router(api_router, prefix="/api")
-app.mount("/api/img", StaticFiles(directory="static/img"), name="static")
+app.include_router(api_router)
+app.mount("/img", StaticFiles(directory="static/img"), name="static")
 
-
-@app.get("/")
-def read_root():
-    return {"Hello": "World"}
+rabbitmq.init_queue()
 
 
 @app.exception_handler(500)

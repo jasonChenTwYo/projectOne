@@ -1,6 +1,5 @@
-from uuid import UUID
 from fastapi import APIRouter, Request, Query, Path, Depends
-from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.responses import StreamingResponse
 from typing import Annotated
 import logging
 
@@ -31,7 +30,7 @@ from app.api.response import (
 )
 from fastapi import BackgroundTasks
 
-from app.api.rabbitmq import publish_message_to_rabbitmq
+from app.rabbitmq import publish_message_to_rabbitmq
 from app.db_mongodb import mongodb_async_dao
 
 
@@ -80,7 +79,7 @@ def get_video_by_tag(
 def get_video_by_id(
     *,
     session: Session = Depends(get_session),
-    video_id: Annotated[UUID, Path()],
+    video_id: Annotated[str, Path()],
 ):
 
     return get_video_service.get_video_info(session, video_id)
@@ -142,7 +141,7 @@ async def delete_reply(
 
 @router.get("/get-video-comment/{video_id}")
 async def get_video_comment(
-    video_id: Annotated[UUID, Path()],
+    video_id: Annotated[str, Path()],
 ):
-    comments = await mongodb_async_dao.find_video_comment(str(video_id))
+    comments = await mongodb_async_dao.find_video_comment(video_id)
     return {"comments": comments}

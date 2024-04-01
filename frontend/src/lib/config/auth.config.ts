@@ -35,8 +35,10 @@ const authConfig = {
           formData.append("password", password);
           const authResponse = await fetch(
             `${
-              process.env.PROXY_HOST ?? "http://127.0.0.1:8000"
-            }/api/login/access-token`,
+              process.env.PROXY_HOST
+                ? `${process.env.PROXY_HOST}/api`
+                : "http://127.0.0.1:8000"
+            }/login/access-token`,
             {
               method: "POST",
               body: formData,

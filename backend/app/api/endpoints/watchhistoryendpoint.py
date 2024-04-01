@@ -1,6 +1,5 @@
 from datetime import date, datetime
 from typing import Annotated
-from uuid import UUID
 from fastapi import APIRouter, Depends, Path
 from sqlalchemy import desc
 from sqlmodel import Session, select
@@ -55,8 +54,12 @@ def get_watch_history(
     video_list = []
     results = session.exec(statement)
     for video_info, watch_time in results:
+        categories = []
+        for category in video_info.categories:
+            categories.append(category.model_dump())
         data = video_info.model_dump()
         data["watch_time"] = watch_time
+        data["categories"] = categories
         video_list.append(data)
     return {"message": "success", "video_list": video_list}
 
@@ -66,7 +69,7 @@ def add_watch_history(
     *,
     session: Session = Depends(get_session),
     current_token: CurrentToken,
-    video_id: Annotated[UUID, Path()],
+    video_id: Annotated[str, Path()],
 ):
     today_start = datetime.combine(date.today(), datetime.min.time())
     today_end = datetime.combine(date.today(), datetime.max.time())

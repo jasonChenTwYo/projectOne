@@ -16,10 +16,12 @@ export default function PlayVideo({ video_id }: { video_id: UUID }) {
 
   useEffect(() => {
     const fetchAndSetVideoInfo = async () => {
-      if (!videoInfo.video_id) {
+      if (!videoInfo.video_id || videoInfo.video_id !== video_id) {
+        console.log("fetch video info");
         try {
           const response = await getVideoInfoApi(video_id);
           setvideoInfo({ ...response.video_info });
+          dispatch(setInfo({ ...response.video_info }));
         } catch (error) {
           console.error("Failed to fetch video info:", error);
         }
@@ -58,7 +60,6 @@ export default function PlayVideo({ video_id }: { video_id: UUID }) {
                 type="button"
                 className="inline-flex items-center px-4 py-2 bg-blue-100 rounded-full text-sm font-medium text-blue-700 mr-2 hover:bg-blue-200 focus:outline-none"
                 onClick={() => {
-                  dispatch(setInfo({}));
                   router.push(`/video/category/${tag.category_name}`);
                 }}
               >

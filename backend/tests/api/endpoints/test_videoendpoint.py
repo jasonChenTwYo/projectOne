@@ -53,8 +53,10 @@ def setup_and_teardown(session: Session):
 
     main.app.dependency_overrides[get_session] = get_session_override
     main.app.dependency_overrides[get_login_token] = get_login_token_override
+    logging.info("Setup")
     yield
     # Teardown
+    logging.info("Teardown")
     mongodb_sync_dao.sync_engine.get_collection(VideoComment).drop()
     main.app.dependency_overrides.clear()
 

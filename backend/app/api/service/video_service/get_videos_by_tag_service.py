@@ -1,4 +1,3 @@
-from uuid import UUID
 from sqlmodel import Session, select
 from sqlalchemy.orm import selectinload
 from app.db_mysql.mysql_models import (

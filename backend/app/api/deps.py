@@ -6,7 +6,7 @@ from app.db_mongodb import mongodb_async_dao
 from datetime import datetime
 import logging
 
-oauth2_token = OAuth2PasswordBearer(tokenUrl="/api/login/access-token")
+oauth2_token = OAuth2PasswordBearer(tokenUrl="/login/access-token")
 
 TokenDep = Annotated[str, Depends(oauth2_token)]
 

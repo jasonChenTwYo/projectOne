@@ -15,8 +15,4 @@ WORKDIR /app
 
 COPY --from=builder /app/build/libs/*.jar /app/app.jar
 
-RUN groupadd -r appuser && useradd --no-log-init -r -g appuser appuser
-
-USER appuser
-
-ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+ENTRYPOINT ["java", "-jar", "/app/app.jar","--spring.profiles.active=dev"]

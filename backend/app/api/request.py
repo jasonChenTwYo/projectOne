@@ -3,7 +3,6 @@ from pydantic import BaseModel, Field, EmailStr, validator
 from fastapi import UploadFile, Form, Path, Query
 from typing import Annotated, Optional
 from dataclasses import dataclass
-from uuid import UUID
 
 
 class AddCommentRequest(BaseModel):

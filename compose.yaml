@@ -31,6 +31,8 @@ services:
     volumes:
       - ./backend/static:/app/static
     depends_on:
+      queue:
+        condition: service_started
       mongodb:
         condition: service_started
       mysql:
@@ -48,8 +50,13 @@ services:
     restart: always
     build:
       context: messagelistener
+    volumes:
+      - ./backend/static:/app/static
     networks:
       - backend
+    depends_on:
+      queue:
+        condition: service_started
 
   # https://hub.docker.com/_/mongo
   mongodb:
@@ -112,7 +119,9 @@ services:
     ports:
       - 80:80
     depends_on:
-      - backend
+      backend:
+        condition: service_started
+
     networks:
       - frontend
 # 建立網路，建立網路後兩個container就可以用services中宣告的名字當去連線

@@ -17,5 +17,7 @@ class Settings(BaseSettings):
     IMG_BASE_PATH: str = "static/img"
     IMG_TEMP_BASE_PATH: str = "static/temp/img"
 
+    RABBITMQ_HOST: str = "localhost"
+
 
 settings = Settings()

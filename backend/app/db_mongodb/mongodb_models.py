@@ -1,7 +1,7 @@
 from typing import Optional
 from odmantic import EmbeddedModel, Model, Field
 from datetime import UTC, datetime, timedelta
-from uuid import UUID, uuid4
+from uuid import uuid4
 
 
 class LoginToken(Model):

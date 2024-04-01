@@ -1,11 +1,10 @@
-from uuid import UUID
 from sqlmodel import Session, select
 from sqlalchemy.orm import selectinload
 import logging
 from app.db_mysql.mysql_models import UserTable, VideoTable
 
 
-def get_video_info(session: Session, vide_id: UUID):
+def get_video_info(session: Session, vide_id: str):
 
     statement = (
         select(VideoTable, UserTable.user_name)
