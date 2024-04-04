@@ -20,10 +20,10 @@ async def get_login_token(token: TokenDep) -> LoginToken:
     login_token = await mongodb_async_dao.find_login_token_by_access_token(token)
     if not login_token:
         logging.error(f"沒找到 {token=}")
-        raise HTTPException(status_code=404, detail="not found")
+        raise HTTPException(status_code=404, detail="token not found")
     if login_token.access_token_expires_at < datetime.now():
         logging.error(f"過期 {token=} {login_token.access_token_expires_at=}")
-        raise HTTPException(status_code=404, detail="not found")
+        raise HTTPException(status_code=404, detail="token not found")
     return login_token
 
 

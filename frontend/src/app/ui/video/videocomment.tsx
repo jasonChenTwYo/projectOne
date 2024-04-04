@@ -17,20 +17,23 @@ export default function VideoComment({
 }>) {
   const [comments, setComments] = useState<Comments[]>([]);
   const [newComment, setNewComment] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
 
   const user = useAppSelector((state) => state.userInfo);
 
-  const fetchComments = async () => {
+  const fetchComments: () => Promise<void> = async function () {
     try {
-      const response = await getVideoCommentsApi(video_id);
+      const response = await getVideoCommentsApi(video_id, currentPage);
       setComments(response.comments);
+      setTotalPages(response.total);
     } catch (error) {
       console.error("Failed to fetch comments:", error);
     }
   };
   useEffect(() => {
     fetchComments();
-  }, []);
+  }, [currentPage]);
 
   return (
     <>
@@ -49,6 +52,20 @@ export default function VideoComment({
           />
         );
       })}
+      <div className="pagination-controls">
+        <button
+          disabled={currentPage === 1}
+          onClick={() => setCurrentPage(currentPage - 1)}
+        >
+          Previous
+        </button>
+        <button
+          disabled={currentPage === totalPages}
+          onClick={() => setCurrentPage(currentPage + 1)}
+        >
+          Next
+        </button>
+      </div>
       {user?.access_token && (
         <>
           <textarea

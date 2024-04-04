@@ -8,11 +8,12 @@ import {
   BaseResponse,
   CategoryForGetAllCategoryResponse,
   Comments,
+  GetChannelInfoResponse,
+  GetChannelVideoApiResponse,
   GetCommentsResponse,
   GetHomeVideoResponse,
   GetTagVideoResponse,
   GetVideoInfoResponse,
-  LogOutResponse,
   RegisterResponse,
   UploadVideoApiResponse,
 } from "@/common/response";
@@ -72,14 +73,23 @@ function createApiInstance(
     async (error: AxiosError) => {
       console.log(error.message);
       console.log(error.response?.data);
-      await signOut({ callbackUrl: "/login" });
+      if (
+        error.message === "Request failed with status code 404" &&
+        JSON.stringify(error.response?.data) ===
+          JSON.stringify({ detail: "token not found" })
+      ) {
+        await signOut({ callbackUrl: "/login" });
+      }
+      if (error.message === "access_token not find") {
+        await signOut({ callbackUrl: "/login" });
+      }
       return Promise.reject(error);
     }
   );
 
   return instance;
 }
-export const uploadVideoApi = async (
+export const uploadVideoApi = (
   formData: FormData
 ): Promise<UploadVideoApiResponse> => {
   const api = createApiInstance({
@@ -99,21 +109,65 @@ export const uploadVideoApi = async (
     });
 };
 
-export const records_history = async (
+export const getChannelInfoApi = (
+  account: string
+): Promise<GetChannelInfoResponse> => {
+  const api = createApiInstance();
+  return api
+    .get<GetChannelInfoResponse>(
+      `${
+        process.env.PROXY_HOST
+          ? `${process.env.PROXY_HOST}/api`
+          : "http://127.0.0.1:8000"
+      }/userInfo?account=${account}`
+    )
+    .then((res) => res.data);
+};
+
+export const getChannelVideoApi = function (
+  account: string
+): Promise<GetChannelVideoApiResponse> {
+  const api = createApiInstance();
+  return api
+    .get<GetChannelVideoApiResponse>(
+      `${
+        process.env.PROXY_HOST
+          ? `${process.env.PROXY_HOST}/api`
+          : "http://127.0.0.1:8000"
+      }/get-video/channel/${account}`
+    )
+    .then((res) => res.data);
+};
+
+export const deleteChannelVideoApi = (
   video_id: string
 ): Promise<BaseResponse> => {
   const api = createApiInstance({ isAuth: true });
   return api
+    .post<BaseResponse>(
+      `${
+        process.env.PROXY_HOST
+          ? `${process.env.PROXY_HOST}/api`
+          : "http://127.0.0.1:8000"
+      }/delete/video`,
+      { video_id: video_id }
+    )
+    .then((res) => res.data);
+};
+
+export const recordsHistoryApi = (video_id: string): Promise<BaseResponse> => {
+  const api = createApiInstance({ isAuth: true });
+  return api
     .post<BaseResponse>(`/api/add-history/${video_id}`)
-    .then((res) => res.data)
+    .then((res) => {
+      return res.data;
+    })
     .catch(() => {
       return { message: "fail" };
     });
 };
 
-export const registerApi = async (
-  formData: FormData
-): Promise<RegisterResponse> => {
+export const registerApi = (formData: FormData): Promise<RegisterResponse> => {
   const api = createApiInstance();
   return api
     .post<RegisterResponse>("/api/register", formDataToJson(formData))
@@ -123,7 +177,7 @@ export const registerApi = async (
     });
 };
 
-export const addVideoCommentRequestApi = async (
+export const addVideoCommentRequestApi = (
   addVideoCommentRequest: AddVideoCommentRequest
 ): Promise<BaseResponse> => {
   const api = createApiInstance({ isAuth: true });
@@ -135,7 +189,7 @@ export const addVideoCommentRequestApi = async (
     });
 };
 
-export const deleteVideoCommentRequestApi = async (
+export const deleteVideoCommentRequestApi = (
   deleteVideoCommentRequest: DeleteVideoCommentRequest
 ): Promise<BaseResponse> => {
   const api = createApiInstance({ isAuth: true });
@@ -147,7 +201,7 @@ export const deleteVideoCommentRequestApi = async (
     });
 };
 
-export const addReplyRequestApi = async (
+export const addReplyRequestApi = (
   addReplyRequest: AddReplyRequest
 ): Promise<Comments> => {
   const api = createApiInstance({ isAuth: true });
@@ -159,7 +213,7 @@ export const addReplyRequestApi = async (
     });
 };
 
-export const deleteReplyRequestApi = async (
+export const deleteReplyRequestApi = (
   deleteReplyRequest: DeleteReplyRequest
 ): Promise<Comments> => {
   const api = createApiInstance({ isAuth: true });
@@ -171,7 +225,7 @@ export const deleteReplyRequestApi = async (
     });
 };
 
-export const getHomeVideoApi = async (): Promise<GetHomeVideoResponse> => {
+export const getHomeVideoApi = (): Promise<GetHomeVideoResponse> => {
   const api = createApiInstance();
   return api
     .get<GetHomeVideoResponse>("/api/home/get-video")
@@ -181,13 +235,17 @@ export const getHomeVideoApi = async (): Promise<GetHomeVideoResponse> => {
     });
 };
 
-export const getTagVideoResponse = async (
+export const getTagVideoResponse = (
   category_name: string
 ): Promise<GetTagVideoResponse> => {
   const api = createApiInstance();
   return api
     .get<GetTagVideoResponse>(
-      `${process.env.PROXY_HOST ?? ""}/api/tag/${category_name}`
+      `${
+        process.env.PROXY_HOST
+          ? `${process.env.PROXY_HOST}/api`
+          : "http://127.0.0.1:8000"
+      }/tag/${category_name}`
     )
     .then((res) => res.data)
     .catch(() => {
@@ -195,19 +253,20 @@ export const getTagVideoResponse = async (
     });
 };
 
-export const getVideoCommentsApi = async (
-  video_id: string
+export const getVideoCommentsApi = (
+  video_id: string,
+  page: number
 ): Promise<GetCommentsResponse> => {
   const api = createApiInstance();
   return api
-    .get<GetCommentsResponse>(`/api/get-video-comment/${video_id}`)
+    .get<GetCommentsResponse>(`/api/get-video-comment/${video_id}?page=${page}`)
     .then((res) => res.data)
     .catch((error: AxiosError) => {
-      return { comments: [] };
+      return { comments: [], total: 0 };
     });
 };
 
-export const getVideoInfoApi = async (
+export const getVideoInfoApi = (
   video_id: string
 ): Promise<GetVideoInfoResponse> => {
   const api = createApiInstance();
@@ -220,7 +279,7 @@ export const getVideoInfoApi = async (
 };
 
 export const getAllCategoryApi =
-  async (): Promise<CategoryForGetAllCategoryResponse> => {
+  (): Promise<CategoryForGetAllCategoryResponse> => {
     const api = createApiInstance();
     return api
       .get<CategoryForGetAllCategoryResponse>(`/api/get-category/all`)

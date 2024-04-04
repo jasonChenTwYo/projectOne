@@ -23,9 +23,12 @@ export default function Page() {
   return (
     <main className="grid grid-cols-4 gap-5 container mx-auto py-20">
       {videoList.map((video) => {
-        const imagName = video.thumbnail_path ?? "Folder.jpg";
-        const groupPath = video.user_id ?? "default";
-        const imagPath = `${groupPath}/${imagName}`;
+        const imageName = video.thumbnail_path ?? "unavailable.svg";
+        const groupPath = video.user_id ?? "";
+        const imagePath =
+          video.title === "delete"
+            ? "unavailable.svg"
+            : `${groupPath}/${imageName}`;
         return (
           <Link
             className=" h-auto"
@@ -36,7 +39,7 @@ export default function Page() {
             }}
           >
             <Image
-              src={`/api/img/${imagPath}`}
+              src={`/api/img/${imagePath}`}
               width={300}
               height={500}
               alt="Picture of the author"

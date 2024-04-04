@@ -17,6 +17,27 @@ class AddVideoCommentRequest(BaseModel):
     comment_message: str
 
 
+class DeleteVideoRequest(BaseModel):
+    video_id: str
+
+
+@dataclass
+class GetUserInfoRequest:
+    account: Annotated[
+        Optional[str], Query(description="使用者帳號,跟使用者id只能二選一")
+    ] = None
+    user_id: Annotated[
+        Optional[str], Query(description="使用者id,跟使用者帳號只能二選一")
+    ] = None
+
+    # __post_init__ 方法會在自動生成的 __init__ 方法完成實例屬性設置之後自動調用。
+    def __post_init__(self):
+        if (self.account is None) & (self.user_id is None):
+            raise RequestValidationError("account 跟 user_id 需有一個有值")
+        if (self.account is not None) & (self.user_id is not None):
+            raise RequestValidationError("account 跟 user_id 只能擇一")
+
+
 class DeleteVideoCommentRequest(BaseModel):
     video_comment_id: str
 

@@ -3,13 +3,15 @@ from fastapi.responses import StreamingResponse
 from typing import Annotated
 import logging
 
+from sqlalchemy import update
 from sqlmodel import Session
 from app.api.service.video_service import (
+    get_home_videos_service,
     get_videos_by_tag_service,
     play_video_service,
     upload_video_service,
-    get_home_video_service,
     get_video_service,
+    get_videos_by_user_service,
 )
 from app.api.deps import CurrentToken
 from app.api.request import (
@@ -17,6 +19,7 @@ from app.api.request import (
     DeleteReplyRequest,
     AddVideoCommentRequest,
     DeleteVideoCommentRequest,
+    DeleteVideoRequest,
     PlayVideoRequest,
     UploadVideoForm,
 )
@@ -30,6 +33,7 @@ from app.api.response import (
 )
 from fastapi import BackgroundTasks
 
+from app.db_mysql.mysql_models import VideoTable
 from app.rabbitmq import publish_message_to_rabbitmq
 from app.db_mongodb import mongodb_async_dao
 
@@ -42,7 +46,6 @@ def play_video(
     request: Request,
     play_video_request: Annotated[PlayVideoRequest, Depends()],
 ) -> StreamingResponse:
-
     # 檢查請求頭中是否包含 Range 字段
     range_header = request.headers.get("Range")
     return play_video_service.play_video(range_header, play_video_request)
@@ -61,8 +64,7 @@ async def upload_video(
 
 @router.get("/home/get-video", response_model=GetHomeVideoResponse)
 def get_home_video(*, session: Session = Depends(get_session)):
-
-    return get_home_video_service.get_home_video(session)
+    return get_home_videos_service.get_home_video(session)
 
 
 @router.get("/tag/{category_name}", response_model=GetVideoListByTagResponse)
@@ -71,8 +73,16 @@ def get_video_by_tag(
     session: Session = Depends(get_session),
     category_name: Annotated[str, Path()],
 ):
-
     return get_videos_by_tag_service.get_videos_by_tag(session, category_name)
+
+
+@router.get("/get-video/channel/{account}", response_model=GetVideoListByTagResponse)
+def get_video_by_user(
+    *,
+    session: Session = Depends(get_session),
+    account: Annotated[str, Path()],
+):
+    return get_videos_by_user_service.get_videos_by_user_account(session, account)
 
 
 @router.get("/get-video/{video_id}", response_model=GetVideoInfoResponse)
@@ -81,8 +91,29 @@ def get_video_by_id(
     session: Session = Depends(get_session),
     video_id: Annotated[str, Path()],
 ):
-
     return get_video_service.get_video_info(session, video_id)
+
+
+@router.post("/delete/video", response_model=BaseResponse)
+def delete_video_by_id(
+    *,
+    session: Session = Depends(get_session),
+    delete_video_request: DeleteVideoRequest,
+    current_token: CurrentToken,
+):
+    statement_second = (
+        update(VideoTable)
+        .where(
+            VideoTable.video_id == delete_video_request.video_id,
+            VideoTable.user_id == current_token.user_id,
+        )
+        .values(title="delete")
+    )
+
+    session.exec(statement_second)
+    session.commit()
+
+    return {"message": "success"}
 
 
 @router.post("/add/comment", response_model=BaseResponse)
@@ -99,7 +130,7 @@ async def add_comment(
 
 
 @router.post("/delete/comment", response_model=BaseResponse)
-async def add_comment(
+async def delete_comment(
     current_token: CurrentToken,
     request: DeleteVideoCommentRequest,
 ):
@@ -142,6 +173,7 @@ async def delete_reply(
 @router.get("/get-video-comment/{video_id}")
 async def get_video_comment(
     video_id: Annotated[str, Path()],
+    page: Annotated[int, Query()],
 ):
-    comments = await mongodb_async_dao.find_video_comment(video_id)
-    return {"comments": comments}
+    comments = await mongodb_async_dao.find_video_comment(video_id, page)
+    return {"comments": comments[0], "total": comments[1]}

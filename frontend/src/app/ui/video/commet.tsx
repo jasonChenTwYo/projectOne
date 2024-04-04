@@ -5,6 +5,7 @@ import { FormEvent, useState } from "react";
 import { Reply } from "@/common/response";
 import { addReplyRequestApi, deleteReplyRequestApi } from "@/service/api";
 import { useAppSelector } from "@/lib/redux/hook";
+import Link from "next/link";
 export default function Comment({
   id,
   account,
@@ -37,7 +38,12 @@ export default function Comment({
           <UserIcon className="w-8 h-8 rounded-full" />
         </div>
         <div className="flex-1">
-          <h4 className="font-bold text-sm">{account}</h4>
+          <Link
+            className="font-bold text-sm underline"
+            href={`/user/${account}`}
+          >
+            {account}
+          </Link>
           <p className="text-gray-700 text-sm mt-1">{comment_message}</p>
           <p className="text-xs text-gray-500">
             {format(comment_time, "yyyy-MM-dd HH:mm:ss")}
@@ -93,7 +99,12 @@ export default function Comment({
                   <UserIcon className="w-7 h-7 rounded-full" />
                 </div>
                 <div className="flex-1">
-                  <h4 className="font-bold text-sm">{reply.account}</h4>
+                  <Link
+                    className="font-bold text-sm underline"
+                    href={`/user/${reply.account}`}
+                  >
+                    {reply.account}
+                  </Link>
                   <p className="text-gray-700 text-sm mt-1">
                     {reply.comment_message}
                   </p>

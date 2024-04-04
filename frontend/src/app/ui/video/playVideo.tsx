@@ -2,10 +2,12 @@
 
 import { VideoInfo, setInfo } from "@/lib/redux/features/videoInfoSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/redux/hook";
-import { getVideoInfoApi, records_history } from "@/service/api";
+import { getVideoInfoApi, recordsHistoryApi } from "@/service/api";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { UUID } from "crypto";
+import { format } from "date-fns";
+import VideoComment from "./videocomment";
 export default function PlayVideo({ video_id }: { video_id: UUID }) {
   const router = useRouter();
   const dispatch = useAppDispatch();
@@ -31,7 +33,7 @@ export default function PlayVideo({ video_id }: { video_id: UUID }) {
     fetchAndSetVideoInfo();
 
     if (user.account) {
-      records_history(video_id)
+      recordsHistoryApi(video_id)
         .then(() => {
           console.log("View history recorded");
         })
@@ -41,6 +43,16 @@ export default function PlayVideo({ video_id }: { video_id: UUID }) {
     }
   }, []);
 
+  const imageName = videoInfo.thumbnail_path ?? "unavailable.svg";
+  const groupPath = videoInfo.user_id ?? "";
+  const imagePath =
+    videoInfo.title === "delete"
+      ? `/api/img/unavailable.svg`
+      : `/api/img/${groupPath}/${imageName}`;
+  const video_path =
+    videoInfo.title === "delete"
+      ? ""
+      : `/api/play-video/${videoInfo.video_path}?group_id=${videoInfo.user_id}`;
   return (
     <>
       {!videoInfo.video_id && <div>Loading....</div>}
@@ -48,10 +60,10 @@ export default function PlayVideo({ video_id }: { video_id: UUID }) {
         <>
           <p>{videoInfo.title}</p>
           <video
-            src={`/api/play-video/${videoInfo.video_path}?group_id=${videoInfo.user_id}`}
+            src={video_path}
             controls
             width="80%"
-            poster={`/api/img/${videoInfo.user_id}/${videoInfo.thumbnail_path}`}
+            poster={imagePath}
           ></video>
           <div className="mt-5">
             {videoInfo.categories?.map((tag) => (
@@ -66,9 +78,17 @@ export default function PlayVideo({ video_id }: { video_id: UUID }) {
                 {tag.category_name}
               </button>
             ))}
+            <p className="text-xs text-gray-500">
+              {format(
+                videoInfo.upload_time ?? new Date(),
+                "yyyy-MM-dd HH:mm:ss"
+              )}
+            </p>
           </div>
         </>
       )}
+
+      {videoInfo.title !== "delete" && <VideoComment video_id={video_id} />}
     </>
   );
 }

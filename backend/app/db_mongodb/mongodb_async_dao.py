@@ -1,3 +1,4 @@
+import logging
 from odmantic import ObjectId
 from pymongo import ReturnDocument
 from app.db_mongodb.mongodb_engine import async_engine
@@ -34,11 +35,13 @@ async def delete_video_comment(video_comment_id: str, account: str):
     return number
 
 
-async def find_video_comment(video_id: str, limit: int = 10, skip: int = 0):
+async def find_video_comment(video_id: str, page: int = 1):
     comments = await async_engine.find(
-        VideoComment, VideoComment.video_id == video_id, limit=limit, skip=skip
+        VideoComment, VideoComment.video_id == video_id, limit=10, skip=10 * (page - 1)
     )
-    return comments
+    count = await async_engine.count(VideoComment, VideoComment.video_id == video_id)
+    logging.info(f"{count=}")
+    return comments, count
 
 
 async def add_reply_to_video_comment(

@@ -24,7 +24,13 @@ class Category:
 
 
 class BaseResponse(BaseModel):
-    message: str
+    message: str = "success"
+
+
+class UserInfoResponse(BaseResponse):
+    account: str
+    email: str
+    user_name: str
 
 
 class GetHomeVideoResponse(BaseResponse):

@@ -4,6 +4,13 @@ export type BaseResponse = {
   message: string;
 };
 
+export type GetChannelInfoResponse = {
+  message: string;
+  account: string;
+  email: string;
+  user_name: string;
+};
+
 export type LogOutResponse = {
   message: string;
 };
@@ -17,6 +24,10 @@ export type UploadVideoApiResponse = {
 };
 
 export type GetHomeVideoResponse = {
+  video_list: VideoInfo[];
+};
+
+export type GetChannelVideoApiResponse = {
   video_list: VideoInfo[];
 };
 
@@ -34,6 +45,7 @@ export type CategoryForGetAllCategoryResponse = {
 
 export type GetCommentsResponse = {
   comments: Comments[];
+  total: number;
 };
 
 export type Comments = {

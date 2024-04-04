@@ -5,6 +5,7 @@ import {
   ArrowLeftStartOnRectangleIcon,
   ArrowRightStartOnRectangleIcon,
   UserPlusIcon,
+  UserIcon,
 } from "@heroicons/react/24/solid";
 import clsx from "clsx";
 import { usePathname, useRouter } from "next/navigation";
@@ -37,6 +38,11 @@ export default function TopBar() {
       name: "上傳影片",
       href: "/video/upload",
       icon: ArrowUpTrayIcon,
+    });
+    links.push({
+      name: "使用者資料",
+      href: `/user/${user.account}`,
+      icon: UserIcon,
     });
   }
   const pathname = usePathname();

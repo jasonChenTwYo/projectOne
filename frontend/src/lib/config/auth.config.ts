@@ -60,19 +60,18 @@ const authConfig = {
   ],
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
-      const isLoggedIn = !!auth?.user;
-      const isOnDashboard = nextUrl.pathname.startsWith("/video/upload");
-      if (isOnDashboard) {
+      const isLoggedIn = auth?.user;
+      const protectedUrls = ["/video/upload", "/video/history"];
+      const isProtectUrl = protectedUrls.includes(nextUrl.pathname);
+      if (isProtectUrl) {
         if (isLoggedIn) return true;
         return false; // Redirect unauthenticated users to login page
+      } else if (isLoggedIn && nextUrl.pathname === "/register") {
+        return Response.redirect(new URL("/", nextUrl));
       }
-      // else if (isLoggedIn) {
-      //   return Response.redirect(new URL("/", nextUrl));
-      // }
       return true;
     },
     jwt({ token, user, account }) {
-      console.log(`jwt callbacks`);
       if (account) {
         console.log("token: " + JSON.stringify(token));
         console.log("user: " + JSON.stringify(user));
@@ -83,7 +82,6 @@ const authConfig = {
       return token;
     },
     session({ session, token }) {
-      console.log(`session callbacks`);
       const parsedCredentials = z
         .object({
           access_token: z.string().uuid(),

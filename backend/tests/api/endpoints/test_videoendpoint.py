@@ -5,7 +5,7 @@ from fastapi.testclient import TestClient
 from httpx import AsyncClient
 import pytest
 import pytest_asyncio
-from sqlalchemy import StaticPool, create_engine
+from sqlalchemy import StaticPool, create_engine, delete
 from sqlmodel import SQLModel, Session
 
 from app import main
@@ -79,7 +79,6 @@ def client_fixture():
 
 @pytest_asyncio.fixture(scope="session")
 async def test_async_client():
-
     async with AsyncClient(app=main.app, base_url="http://test") as ac:
         yield ac
 
@@ -100,7 +99,6 @@ async def test_add_comment(test_async_client: AsyncClient):
 
 @pytest.mark.asyncio(scope="session")
 async def test_add_replies(test_async_client: AsyncClient):
-
     video_comment = VideoComment(
         account="jason", video_id=str(uuid4()), comment_message="test", replies=[]
     )

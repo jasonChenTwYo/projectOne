@@ -8,6 +8,7 @@ export type VideoInfo = {
   user_name?: string;
   description?: string;
   thumbnail_path?: string;
+  upload_time?: Date;
   categories?: Category[];
 };
 

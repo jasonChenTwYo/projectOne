@@ -1,27 +1,20 @@
 from sqlmodel import Session, select
 from sqlalchemy.orm import selectinload
-from app.db_mysql.mysql_models import (
-    CategoryTable,
-    UserTable,
-    VideoCategoryAssociationTable,
-    VideoTable,
-)
+import logging
+from app.db_mysql.mysql_models import UserTable, VideoTable
 
 
-def get_videos_by_tag(session: Session, category_name: str):
+def get_home_video(session: Session):
     video_list = []
     statement = (
         select(VideoTable, UserTable.user_name)
         .join(UserTable, isouter=True)
-        .join(VideoCategoryAssociationTable, isouter=True)
-        .join(CategoryTable, isouter=True)
-        .where(
-            CategoryTable.category_name == category_name, VideoTable.title != "delete"
-        )
+        .limit(10)
+        .where(VideoTable.title != "delete")
         .options(selectinload(VideoTable.categories))
     )
-    result = session.exec(statement)
-    for video, user_name in result:
+    results = session.exec(statement)
+    for video, user_name in results:
         categories = []
         for category in video.categories:
             categories.append(category.model_dump())
@@ -30,4 +23,5 @@ def get_videos_by_tag(session: Session, category_name: str):
         result_data.update({"user_name": user_name})
         result_data.update({"categories": categories})
         video_list.append(result_data)
+        logging.info(f"{result_data=}")
     return {"video_list": video_list, "message": "success"}

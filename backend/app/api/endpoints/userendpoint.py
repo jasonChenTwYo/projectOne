@@ -1,10 +1,10 @@
 from fastapi import APIRouter, HTTPException, status, Depends
-from sqlmodel import Session
+from sqlmodel import Session, select
 from app.api.deps import CurrentToken
 from app.models import Token
 from app.db_mysql.mysql_models import UserTable
-from app.api.request import RegisterRequest
-from app.api.response import BaseResponse
+from app.api.request import GetUserInfoRequest, RegisterRequest
+from app.api.response import BaseResponse, UserInfoResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from typing import Annotated
 import logging
@@ -63,3 +63,22 @@ def register(*, session: Session = Depends(get_session), request: RegisterReques
     os.makedirs(Path(settings.IMG_BASE_PATH) / str(user.user_id))
 
     return {"message": "success"}
+
+
+@router.get(
+    "/userInfo",
+    description="account跟user_id只能二選一",
+    response_model=UserInfoResponse,
+)
+def get_user_info(
+    *,
+    session: Annotated[Session, Depends(get_session)],
+    request: Annotated[GetUserInfoRequest, Depends()]
+):
+    statement = select(UserTable).where(
+        UserTable.user_id == request.user_id
+        if request.user_id is not None
+        else UserTable.account == request.account
+    )
+
+    return session.exec(statement).one()

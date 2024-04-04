@@ -5,28 +5,6 @@ import Link from "next/link";
 import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import { useAppDispatch } from "@/lib/redux/hook";
-type History = VideoInfo & {
-  watch_time: Date;
-};
-
-async function fetchRecords(
-  offset: number
-): Promise<{ video_list: History[]; message: string }> {
-  const session = await getSession();
-
-  if (!session?.access_token) {
-    console.log("access_token not find");
-    throw Error("access_token not find");
-  }
-  const response = await fetch(`/api/history/${offset}`, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${session.access_token}`,
-    },
-  });
-  const data = await response.json();
-  return data;
-}
 
 export default function Page() {
   const [records, setRecords] = useState<History[]>([]);
@@ -34,6 +12,29 @@ export default function Page() {
   const [offset, setOffset] = useState<number>(1);
   const [hasMore, setHasMore] = useState<boolean>(true);
   const loaderRef = useRef<HTMLDivElement | null>(null);
+
+  type History = VideoInfo & {
+    watch_time: Date;
+  };
+
+  async function fetchRecords(
+    offset: number
+  ): Promise<{ video_list: History[]; message: string }> {
+    const session = await getSession();
+
+    if (!session?.access_token) {
+      console.log("access_token not find");
+      throw Error("access_token not find");
+    }
+    const response = await fetch(`/api/history/${offset}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${session.access_token}`,
+      },
+    });
+    const data = await response.json();
+    return data;
+  }
 
   useEffect(() => {
     const loadRecords = async () => {
@@ -77,9 +78,12 @@ export default function Page() {
         <div key={date} className="text-center">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">{date}</h2>
           {records.map((record) => {
-            const imageName = record.thumbnail_path ?? "Folder.jpg";
-            const groupPath = record.user_id ?? "default";
-            const imagePath = `${groupPath}/${imageName}`;
+            const imageName = record.thumbnail_path ?? "unavailable.svg";
+            const groupPath = record.user_id ?? "";
+            const imagePath =
+              record.title === "delete"
+                ? "unavailable.svg"
+                : `${groupPath}/${imageName}`;
             return (
               <div key={record.video_id} className="mb-6">
                 <Link

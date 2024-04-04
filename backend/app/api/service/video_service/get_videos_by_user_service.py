@@ -8,16 +8,15 @@ from app.db_mysql.mysql_models import (
 )
 
 
-def get_videos_by_tag(session: Session, category_name: str):
+def get_videos_by_user_account(session: Session, account: str):
     video_list = []
     statement = (
         select(VideoTable, UserTable.user_name)
-        .join(UserTable, isouter=True)
+        .join(UserTable, VideoTable.user_id == UserTable.user_id, isouter=True)
         .join(VideoCategoryAssociationTable, isouter=True)
         .join(CategoryTable, isouter=True)
-        .where(
-            CategoryTable.category_name == category_name, VideoTable.title != "delete"
-        )
+        .where(UserTable.account == account, VideoTable.title != "delete")
+        .distinct()
         .options(selectinload(VideoTable.categories))
     )
     result = session.exec(statement)

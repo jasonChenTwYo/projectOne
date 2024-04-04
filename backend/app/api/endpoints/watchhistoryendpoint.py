@@ -25,7 +25,6 @@ def get_watch_history(
     current_token: CurrentToken,
     page_number: Annotated[int, Path()],
 ):
-
     offset_value = (page_number - 1) * 5
 
     watch_history_subquery = (
