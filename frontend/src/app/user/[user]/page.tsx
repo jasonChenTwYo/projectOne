@@ -7,13 +7,12 @@ import {
   getChannelInfoApi,
   getChannelVideoApi,
 } from "@/service/api";
-import Link from "next/link";
-import Image from "next/image";
 import { auth } from "@/lib/config/auth.config";
 import { Session } from "next-auth";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import Video from "@/app/ui/video/video";
 
 const uploadVideoSchema = z.object({
   video_id: z.string({
@@ -70,37 +69,18 @@ const Page: React.FC<{ params: { user: string } }> = async function ({
           ))}
       </div>
       {videoList.map((video) => {
-        const imageName = video.thumbnail_path ?? "unavailable.svg";
-        const groupPath = video.user_id ?? "";
-        const imagePath =
-          video.title === "delete"
-            ? "unavailable.svg"
-            : `${groupPath}/${imageName}`;
         return (
           <div key={`${video.video_id}`}>
-            <Link
-              className="bg-white shadow-md rounded-lg overflow-hidden"
-              href={`/video/play?video_id=${video.video_id}`}
-            >
-              <Image
-                src={`/api/img/${imagePath}`}
-                width={300}
-                height={500}
-                alt="Video thumbnail"
-                className="w-full h-auto"
-              />
-              <div className="p-4">
-                <p className="text-base font-semibold">{video.title}</p>
-              </div>
-            </Link>
+            <Video videoInfo={video} />
             {currentUser && currentUser.account === userInfo.account && (
               <form action={createInvoice}>
                 <input
                   name="video_id"
                   className="hidden"
                   value={video.video_id}
+                  readOnly
                 ></input>
-                <button className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-lg">
+                <button className="mt-2 px-4 py-2 bg-red-500 text-white rounded-lg">
                   刪除影片
                 </button>
               </form>

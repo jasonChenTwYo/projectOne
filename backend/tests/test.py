@@ -1,3 +1,4 @@
+from typing import Tuple
 from uuid import uuid4
 
 
@@ -14,10 +15,17 @@ def testTwo(x: int, y: int):
     print("yoyo")
 
 
-result = testTwo(1, 5)
+def testTwos(x: list[str, int]):
+    x.append(5)
+    print(x)
 
-for i in result:
-    print(i)
+
+testTwos([1, 2, 3])
+
+# result = testTwo(1, 5)
+
+# for i in result:
+#     print(i)
 
 # print(result.__next__())
 # print("before next")

@@ -1,5 +1,5 @@
 import logging
-from odmantic import ObjectId
+from odmantic import ObjectId, query
 from pymongo import ReturnDocument
 from app.db_mongodb.mongodb_engine import async_engine
 from app.db_mongodb.mongodb_models import LoginToken, ReplyComment, VideoComment
@@ -37,7 +37,11 @@ async def delete_video_comment(video_comment_id: str, account: str):
 
 async def find_video_comment(video_id: str, page: int = 1):
     comments = await async_engine.find(
-        VideoComment, VideoComment.video_id == video_id, limit=10, skip=10 * (page - 1)
+        VideoComment,
+        VideoComment.video_id == video_id,
+        sort=query.desc(VideoComment.comment_time),
+        limit=3,
+        skip=3 * (page - 1),
     )
     count = await async_engine.count(VideoComment, VideoComment.video_id == video_id)
     logging.info(f"{count=}")
@@ -53,7 +57,7 @@ async def add_reply_to_video_comment(
         account=account, comment_message=comment_message
     ).model_dump()
 
-    # 使用 find_one_and_update 方法原子性地更新文档
+    # 使用 find_one_and_update 方法原子性地更新
     updated_document = await collection.find_one_and_update(
         {"_id": ObjectId(video_comment_id)},
         {"$push": {"replies": new_reply}},

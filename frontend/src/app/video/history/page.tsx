@@ -1,14 +1,11 @@
 "use client";
-import { VideoInfo, setInfo } from "@/lib/redux/features/videoInfoSlice";
+import { VideoInfo } from "@/lib/redux/features/videoInfoSlice";
 import { getSession } from "next-auth/react";
-import Link from "next/link";
 import { useEffect, useState, useRef } from "react";
-import Image from "next/image";
-import { useAppDispatch } from "@/lib/redux/hook";
+import Video from "@/app/ui/video/video";
 
 export default function Page() {
   const [records, setRecords] = useState<History[]>([]);
-  const dispatch = useAppDispatch();
   const [offset, setOffset] = useState<number>(1);
   const [hasMore, setHasMore] = useState<boolean>(true);
   const loaderRef = useRef<HTMLDivElement | null>(null);
@@ -78,31 +75,9 @@ export default function Page() {
         <div key={date} className="text-center">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">{date}</h2>
           {records.map((record) => {
-            const imageName = record.thumbnail_path ?? "unavailable.svg";
-            const groupPath = record.user_id ?? "";
-            const imagePath =
-              record.title === "delete"
-                ? "unavailable.svg"
-                : `${groupPath}/${imageName}`;
             return (
               <div key={record.video_id} className="mb-6">
-                <Link
-                  href={`/video/play?video_id=${record.video_id}`}
-                  onClick={() => {
-                    dispatch(setInfo(record));
-                  }}
-                >
-                  <Image
-                    src={`/api/img/${imagePath}`}
-                    width={300}
-                    height={500}
-                    className="transition-transform duration-200 ease-in-out transform hover:scale-105"
-                    alt="Picture of the author"
-                  />
-                  <p className="p-4 bg-white text-sm font-medium text-gray-900 truncate">
-                    {record.title}
-                  </p>
-                </Link>
+                <Video videoInfo={record} />
               </div>
             );
           })}

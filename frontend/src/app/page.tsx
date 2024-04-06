@@ -1,15 +1,12 @@
 "use client";
 
 import { getHomeVideoApi } from "@/service/api";
-import Link from "next/link";
-import Image from "next/image";
 import { useEffect, useState } from "react";
-import { VideoInfo, setInfo } from "@/lib/redux/features/videoInfoSlice";
-import { useAppDispatch } from "@/lib/redux/hook";
-
+import { VideoInfo } from "@/lib/redux/features/videoInfoSlice";
+import Video from "@/app/ui/video/video";
 export default function Page() {
   const [videoList, setvideoList] = useState<VideoInfo[]>([]);
-  const dispatch = useAppDispatch();
+
   useEffect(() => {
     const fetchVideo = async () => {
       const response = await getHomeVideoApi();
@@ -23,30 +20,7 @@ export default function Page() {
   return (
     <main className="grid grid-cols-4 gap-5 container mx-auto py-20">
       {videoList.map((video) => {
-        const imageName = video.thumbnail_path ?? "unavailable.svg";
-        const groupPath = video.user_id ?? "";
-        const imagePath =
-          video.title === "delete"
-            ? "unavailable.svg"
-            : `${groupPath}/${imageName}`;
-        return (
-          <Link
-            className=" h-auto"
-            key={`${video.video_id}`}
-            href={`/video/play?video_id=${video.video_id}`}
-            onClick={() => {
-              dispatch(setInfo(video));
-            }}
-          >
-            <Image
-              src={`/api/img/${imagePath}`}
-              width={300}
-              height={500}
-              alt="Picture of the author"
-            />
-            <p className="hidden md:block text-base">{video.title}</p>
-          </Link>
-        );
+        return <Video videoInfo={video} key={`${video.video_id}`} />;
       })}
     </main>
   );
