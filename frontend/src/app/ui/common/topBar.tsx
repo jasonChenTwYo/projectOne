@@ -23,11 +23,13 @@ export default function TopBar() {
   if (!user?.access_token) {
     links.push(
       {
+        cy: "login-link",
         name: "登入",
         href: "/login",
         icon: ArrowLeftStartOnRectangleIcon,
       },
       {
+        cy: "register",
         name: "註冊",
         href: "/register",
         icon: UserPlusIcon,
@@ -35,11 +37,13 @@ export default function TopBar() {
     );
   } else {
     links.push({
+      cy: "video-upload-link",
       name: "上傳影片",
       href: "/video/upload",
       icon: ArrowUpTrayIcon,
     });
     links.push({
+      cy: "user-info-link",
       name: "使用者資料",
       href: `/user/${user.account}`,
       icon: UserIcon,
@@ -53,6 +57,7 @@ export default function TopBar() {
         const LinkIcon = link.icon;
         return (
           <Link
+            data-cy={link.cy}
             key={link.name}
             href={link.href}
             className={clsx(
@@ -80,6 +85,7 @@ export default function TopBar() {
           }}
         >
           <button
+            data-cy="logout-link"
             className={clsx(
               "flex h-[48px] w-full grow items-center justify-center gap-2 rounded-md font-medium md:flex-none md:justify-start md:p-2 md:px-3",
               " hover:bg-sky-500/50 hover:text-blue-600"

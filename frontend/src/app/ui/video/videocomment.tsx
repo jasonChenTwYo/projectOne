@@ -98,6 +98,7 @@ export default function VideoComment({
       {user?.access_token && (
         <>
           <textarea
+            data-cy="add-comment-textarea"
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
             name="new-comment"
@@ -107,6 +108,7 @@ export default function VideoComment({
             placeholder="Add a new comment..."
           />
           <button
+            data-cy="add-comment-button"
             onClick={async () => {
               console.log("Adding new comment:", newComment);
               const result = await addVideoCommentRequestApi({

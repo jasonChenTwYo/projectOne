@@ -1,3 +1,5 @@
+import argparse
+import sys
 from typing import Tuple
 from uuid import uuid4
 
@@ -20,7 +22,13 @@ def testTwos(x: list[str, int]):
     print(x)
 
 
-testTwos([1, 2, 3])
+# testTwos([1, 2, 3])
+
+if __name__ == "__main__":
+    paser = argparse.ArgumentParser(description="hello")
+    paser.add_argument("--platform", type=str, help="yoyo", choices=["a", "b"])
+    args = paser.parse_args()
+    print(args.platform)
 
 # result = testTwo(1, 5)
 

@@ -14,6 +14,7 @@ export default function ({ videoInfo }: { videoInfo: VideoInfo }) {
 
   return (
     <Link
+      data-cy={`link-${videoInfo.video_id}`}
       className="h-auto"
       href={`/video/play?video_id=${videoInfo.video_id}`}
       onClick={() => {

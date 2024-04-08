@@ -27,6 +27,7 @@ export default function Page() {
         <label className="mb-3 mt-5 text-xs font-medium text-gray-900">
           <span>Account</span>
           <input
+            data-cy="register-account"
             className="w-72 block mt-2 peer rounded-md border border-gray-200 py-[9px] pl-2 text-sm outline-2 placeholder:text-gray-500"
             id="account"
             type="text"
@@ -43,6 +44,7 @@ export default function Page() {
             type="text"
             name="user_name"
             placeholder="Enter your UserName"
+            data-cy="register-userName"
             required
           />
         </label>
@@ -55,6 +57,7 @@ export default function Page() {
             name="email"
             placeholder="Enter your email address"
             required
+            data-cy="register-email"
           />
           <p className="mt-2 invisible peer-placeholder-shown:!invisible peer-invalid:visible text-pink-600 text-sm">
             Please provide a valid email address.
@@ -68,10 +71,12 @@ export default function Page() {
             type="password"
             name="password"
             placeholder="Enter password"
+            data-cy="register-password"
             minLength={6}
           />
         </label>
         <button
+          data-cy="register-submit"
           formAction={dispatch}
           type="submit"
           className="rounded-full py-2 px-5 bg-sky-500 mt-5 text-xs font-medium text-sky-200"

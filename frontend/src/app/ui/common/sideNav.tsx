@@ -9,14 +9,20 @@ import { useAppSelector } from "@/lib/redux/hook";
 
 export default function SideNav() {
   const links = [
-    { name: "Home", href: "/", icon: HomeIcon },
-    { name: "所有分類", href: "/video/category/all", icon: TagIcon },
+    { name: "Home", href: "/", icon: HomeIcon, cy: "home-link" },
+    {
+      name: "所有分類",
+      href: "/video/category/all",
+      icon: TagIcon,
+      cy: "category-link",
+    },
   ];
 
   const user = useAppSelector((state) => state.userInfo);
 
   if (user?.access_token) {
     links.push({
+      cy: "history-link",
       name: "觀看紀錄",
       href: "/video/history",
       icon: ClockIcon,
@@ -31,6 +37,7 @@ export default function SideNav() {
         const LinkIcon = link.icon;
         return (
           <Link
+            data-cy={link.cy}
             key={link.name}
             href={link.href}
             className={clsx(

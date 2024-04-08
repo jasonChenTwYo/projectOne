@@ -1,7 +1,7 @@
 "use client";
 import { format } from "date-fns";
 import { UserIcon } from "@heroicons/react/24/solid";
-import { MouseEventHandler, SetStateAction, useState } from "react";
+import { MouseEventHandler, useState } from "react";
 import { Reply } from "@/common/response";
 import { addReplyRequestApi, deleteReplyRequestApi } from "@/service/api";
 import { useAppSelector } from "@/lib/redux/hook";

@@ -86,5 +86,11 @@ class UploadVideoForm:
         if self.video_file.content_type != "video/mp4":
             raise RequestValidationError("upload_file must be an MP4 file")
 
-        if self.thumbnail_file.content_type not in ["image/jpeg", "image/png"]:
-            raise RequestValidationError("thumbnail must be an image (JPEG or PNG)")
+        if self.thumbnail_file.content_type not in [
+            "image/jpeg",
+            "image/png",
+            "image/svg+xml",
+        ]:
+            raise RequestValidationError(
+                "Thumbnail must be an image (JPEG, PNG, or SVG)."
+            )

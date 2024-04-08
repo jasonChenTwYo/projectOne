@@ -8,10 +8,10 @@ import { useEffect, useState } from "react";
 import { UUID } from "crypto";
 import { format } from "date-fns";
 import VideoComment from "./videocomment";
-export default function PlayVideo({ video_id }: { video_id: UUID }) {
+export default function PlayVideo({ video_id }: Readonly<{ video_id: UUID }>) {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const [videoInfo, setvideoInfo] = useState<VideoInfo>(
+  const [videoInfo, setVideoInfo] = useState<VideoInfo>(
     useAppSelector((state) => state.videoInfo)
   );
   const user = useAppSelector((state) => state.userInfo);
@@ -22,7 +22,7 @@ export default function PlayVideo({ video_id }: { video_id: UUID }) {
         console.log("fetch video info");
         try {
           const response = await getVideoInfoApi(video_id);
-          setvideoInfo({ ...response.video_info });
+          setVideoInfo({ ...response.video_info });
           dispatch(setInfo({ ...response.video_info }));
         } catch (error) {
           console.error("Failed to fetch video info:", error);
@@ -54,7 +54,7 @@ export default function PlayVideo({ video_id }: { video_id: UUID }) {
       ? ""
       : `/api/play-video/${videoInfo.video_path}?group_id=${videoInfo.user_id}`;
   return (
-    <>
+    <div>
       {!videoInfo.video_id && <div>Loading....</div>}
       {videoInfo.video_id && (
         <>
@@ -62,7 +62,7 @@ export default function PlayVideo({ video_id }: { video_id: UUID }) {
           <video
             src={video_path}
             controls
-            width="80%"
+            className="mx-auto w-3/4 rounded-lg shadow-lg"
             poster={imagePath}
           ></video>
           <div className="mt-5">
@@ -89,6 +89,6 @@ export default function PlayVideo({ video_id }: { video_id: UUID }) {
       )}
 
       {videoInfo.title !== "delete" && <VideoComment video_id={video_id} />}
-    </>
+    </div>
   );
 }

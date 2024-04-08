@@ -58,6 +58,7 @@ export default function Page() {
             type="email"
             name="email"
             placeholder="Enter your email address"
+            data-cy="login-email"
             required
           />
           <p className="mt-2 invisible peer-placeholder-shown:!invisible peer-invalid:visible text-pink-600 text-sm">
@@ -72,11 +73,13 @@ export default function Page() {
             type="password"
             name="password"
             placeholder="Enter password"
+            data-cy="login-password"
             minLength={6}
           />
         </label>
         <button
           formAction={dispatch}
+          data-cy="login-submit"
           type="submit"
           className="rounded-full py-2 px-5 bg-sky-500 mt-5 text-xs font-medium text-sky-200"
         >
