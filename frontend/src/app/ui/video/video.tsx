@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { VideoInfo, setInfo } from "@/lib/redux/features/videoInfoSlice";
 import { useAppDispatch } from "@/lib/redux/hook";
-export default function ({ videoInfo }: { videoInfo: VideoInfo }) {
+export default function Video({ videoInfo }: { videoInfo: VideoInfo }) {
   const dispatch = useAppDispatch();
   const imageName = videoInfo.thumbnail_path ?? "unavailable.svg";
   const groupPath = videoInfo.user_id ?? "";
