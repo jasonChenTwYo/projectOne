@@ -2,7 +2,9 @@ import json
 import pika
 from app.config.config import settings
 
-credentials = pika.PlainCredentials("guest", "guest")
+credentials = pika.PlainCredentials(
+    settings.RABBITMQ_DEFAULT_USER, settings.RABBITMQ_DEFAULT_PASS
+)
 connection_parameters = pika.ConnectionParameters(
     host=settings.RABBITMQ_HOST,
     port=5672,
@@ -16,7 +18,6 @@ def get_connection():
 
 
 def publish_message_to_rabbitmq(task_data: dict):
-
     for connection in get_connection():
         channel = connection.channel()
         channel.queue_declare(queue="file_processing_tasks")

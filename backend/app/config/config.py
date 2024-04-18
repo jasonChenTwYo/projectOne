@@ -2,6 +2,8 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
+    TOKEN_URL: str = "/login/access-token"
+
     MYSQL_DATABASE: str = "projectOne"
     MYSQL_HOST: str = "localhost"
     MYSQL_USER: str = "appuser"
@@ -18,6 +20,8 @@ class Settings(BaseSettings):
     IMG_TEMP_BASE_PATH: str = "static/temp/img"
 
     RABBITMQ_HOST: str = "localhost"
+    RABBITMQ_DEFAULT_USER: str = "user"
+    RABBITMQ_DEFAULT_PASS: str = "password"
 
 
 settings = Settings()

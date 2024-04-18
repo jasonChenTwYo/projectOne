@@ -39,6 +39,8 @@ services:
         condition: service_healthy
   queue:
     image: rabbitmq:3-management
+    env_file:
+      - .env
     restart: always
     ports:
       - "5672:5672"
@@ -91,6 +93,8 @@ services:
       # 參考文件: https://hub.docker.com/_/mysql 的 Initializing a fresh instance 章節
       - ./mysql/sqls:/docker-entrypoint-initdb.d
       # 亂碼問題 https://ithelp.ithome.com.tw/articles/10221541
+      # show variables like 'collation%';
+      # show variables like 'char%';
       - ./mysql/conf:/etc/mysql/conf.d
     secrets:
       - mysql_root_password

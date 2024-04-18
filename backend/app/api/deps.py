@@ -3,10 +3,11 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from app.db_mongodb.mongodb_models import LoginToken
 from app.db_mongodb import mongodb_async_dao
+from app.config.config import settings
 from datetime import datetime
 import logging
 
-oauth2_token = OAuth2PasswordBearer(tokenUrl="/login/access-token")
+oauth2_token = OAuth2PasswordBearer(tokenUrl=settings.TOKEN_URL)
 
 TokenDep = Annotated[str, Depends(oauth2_token)]
 
