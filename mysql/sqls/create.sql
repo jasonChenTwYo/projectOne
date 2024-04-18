@@ -1,9 +1,9 @@
 -- 用戶表
 create table user (
     user_id char(36) primary key comment '用戶ID，主鍵，UUID',
-    account VARCHAR(255) NOT NULL unique COMMENT '帳號，唯一，不允許為空',
-    user_name varchar(255) not null comment '用戶名，不允許為空',
-    email varchar(255) not null unique comment '電子郵箱，唯一，不允許為空',
+    account varchar(255) NOT NULL unique COMMENT '帳號，唯一，不允許為空',
+    user_name varchar(50) not null comment '用戶名，不允許為空',
+    email varchar(50) not null unique comment '電子郵箱，唯一，不允許為空',
     password_hash varchar(255) not null comment '密碼哈希值，不允許為空',
     create_time timestamp default current_timestamp comment '創建時間，默認為當前時間戳'
 ) comment='用戶資訊表';
@@ -11,14 +11,14 @@ create table user (
 -- 影片分類表
 create table category (
     category_id char(36) primary key comment '分類ID，主鍵，UUID',
-    category_name varchar(255) not null unique comment '分類名稱，不允許為空'
+    category_name varchar(50) not null unique comment '分類名稱，不允許為空'
 ) comment='影片分類資訊表';
 
 -- 影片表
 create table video (
     video_id char(36) primary key comment '影片ID，主鍵，UUID',
     user_id char(36) comment '用戶ID，外鍵，引用用戶表的user_id',
-    title varchar(255) not null comment '影片標題，不允許為空',
+    title varchar(50) not null comment '影片標題，不允許為空',
     description text comment '影片描述',
     upload_time timestamp default current_timestamp comment '上傳時間，默認為當前時間戳',
     video_path varchar(255) not null comment '影片路徑，不允許為空',

@@ -76,18 +76,12 @@ services:
 
   # https://hub.docker.com/_/mysql
   mysql:
-    image: mysql
+    build:
+      context: mysql
     restart: always
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     env_file:
       - .env
-    # 避免 warning: World-writable config file my.cnf is ignored
-    # mysql 會覺得這個文件會容易被修改，所以需要管制
-    # 755  要更改目錄權限，以確保 MySQL 使用者和其所在群組具有讀取和執行權限。 
-    # 644  要更改文件權限，確保配置文件對 MySQL 使用者和其所在群組可讀取，但其他使用者無法寫入。
-    command: >
-      bash -c "chmod 644 /etc/mysql/conf.d/my.cnf &&  
-               chmod 755 /etc/mysql/conf.d &&
-               docker-entrypoint.sh mysqld"  
     ports:
       - 3306:3306
     volumes:
